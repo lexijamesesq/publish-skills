@@ -35,7 +35,7 @@ QA_PY="${SCRIPT_DIR}/../../house-qa/qa.py"
 # estate-hooks plugin's packaged copy — the only one that survives once
 # dotty's own copy is retired. The old hardcoded ../../../../git-hooks/ walk
 # assumed this script always lived inside a dotty-shaped checkout; from the
-# work-lifecycle plugin cache that path doesn't exist at all (SCRIPT_DIR/../..
+# core plugin cache that path doesn't exist at all (SCRIPT_DIR/../..
 # is the plugin's OWN root, which has no git-hooks/ sibling — estate-hooks is
 # a separate plugin). Same-repo checked first (cheap, no lookup needed); the
 # installed estate-hooks cache is the general case a packaged copy always has.
