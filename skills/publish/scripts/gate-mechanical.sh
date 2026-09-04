@@ -55,7 +55,7 @@ for profile_dir in sys.argv[1:]:
             data = json.load(f)
     except Exception:
         continue
-    for e in data.get("plugins", {}).get("estate-hooks@work-lifecycle", []):
+    for e in data.get("plugins", {}).get("estate-hooks@core", []):
         if isinstance(e, dict) and e.get("scope") == "user":
             ip = e.get("installPath")
             if ip and os.path.isdir(ip):
@@ -74,7 +74,7 @@ sys.exit(1)
 GITLEAKS_COMMON="$(resolve_gitleaks_common)" || {
     echo "gate-mechanical.sh: cannot locate gitleaks-common.sh — checked" >&2
     echo "  ${SCRIPT_DIR}/../../../../git-hooks/gitleaks-common.sh" >&2
-    echo "  and every \$HOME/.claude-*'s installed estate-hooks@work-lifecycle cache." >&2
+    echo "  and every \$HOME/.claude-*'s installed estate-hooks@core cache." >&2
     echo "Reinstall estate-hooks, or run gate-mechanical.sh from a checkout with git-hooks/." >&2
     exit 2
 }

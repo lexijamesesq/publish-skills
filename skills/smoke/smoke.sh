@@ -43,7 +43,7 @@ report() {
 }
 
 # resolve_estate_hooks_install <profile_dir> — echoes the installPath of
-# estate-hooks@work-lifecycle's scope:user install entry from that profile's
+# estate-hooks@core's scope:user install entry from that profile's
 # installed_plugins.json, or nothing if unresolved. Shared by probe 1 (which
 # needs one real cache to pipe JSON at) and probe 6 (defined further down,
 # which keeps its own inline resolution — this helper exists for probe 1
@@ -56,7 +56,7 @@ try:
         data = json.load(f)
 except Exception:
     sys.exit(0)
-entries = data.get("plugins", {}).get("estate-hooks@work-lifecycle", [])
+entries = data.get("plugins", {}).get("estate-hooks@core", [])
 for e in entries:
     if isinstance(e, dict) and e.get("scope") == "user":
         p = e.get("installPath", "")
@@ -78,7 +78,7 @@ PYEOF
 # Reworked: the hook used to be resolved by a path relative to
 # this script's own location (valid when smoke.sh and the hooks shipped
 # from the same dotty checkout). Post-cutover, hooks ship from the separate
-# estate-hooks@work-lifecycle plugin — this probe was silently broken
+# estate-hooks@core plugin — this probe was silently broken
 # (confirmed live pre-rework: FAIL, hook missing at a path inside
 # work-lifecycle's own tree that was never where hooks lived). Resolves the
 # hook from the installed estate-hooks cache instead, scoped to a profile
@@ -126,7 +126,7 @@ print("EMPTY" if s.get("hooks", object()) == {} else "OTHER")
 
     if [[ -z "$install_path" ]]; then
         report FAIL "$name" \
-            "estate-hooks@work-lifecycle installPath unresolved from $installed_path (staleness — the probed surface moved)"
+            "estate-hooks@core installPath unresolved from $installed_path (staleness — the probed surface moved)"
         return
     fi
 
@@ -681,7 +681,7 @@ probe_plugin_shadow_integrity() {
 #
 # Proves that when a profile's settings.json registers no hooks directly
 # (hooks: {}), meaning its guards are meant to run from the
-# estate-hooks@work-lifecycle plugin, that plugin is actually enabled AND its
+# estate-hooks@core plugin, that plugin is actually enabled AND its
 # installed cache still serves every hook the plugin declares — cross-checked
 # against hooks/manifest.json's "hooks" list (ground truth authored
 # alongside the scripts, kept out of plugin.json itself since that file's
@@ -701,7 +701,7 @@ probe_plugin_shadow_integrity() {
 PY_PLUGIN_HOOK_CHECK="$(cat <<'PYEOF'
 import json, os, sys
 
-PLUGIN_KEY = "estate-hooks@work-lifecycle"
+PLUGIN_KEY = "estate-hooks@core"
 
 
 def load_json(path):
@@ -896,7 +896,7 @@ probe_plugin_hook_serving() {
 # actually enabled (enabledPlugins[<id>] is true) AND actually installed
 # (installed_plugins.json carries a scope:user entry for it) — the
 # declared-vs-live check probe 6 already runs for one hardcoded id
-# (estate-hooks@work-lifecycle), generalized here across the full declared
+# (estate-hooks@core), generalized here across the full declared
 # list so a future wiki/operator plugin is covered with no further edit
 # to THIS probe (same plugins.json-reading design as probe 5's rework).
 #
@@ -1297,7 +1297,7 @@ def main():
                 )
 
         # (b) traffic-cone shim currency, once (not per profile — one shim,
-        # one PATH). work-lifecycle@work-lifecycle's scope:user installPath
+        # one PATH). core@core's scope:user installPath
         # is the shim's declared resolution target (traffic-cone-shim.sh
         # header); check it against whichever profile resolves first.
         if not shim_checked:
@@ -1306,7 +1306,7 @@ def main():
             except Exception as e:
                 problems.append(f"{profile}: installed_plugins.json unreadable: {e}")
                 continue
-            wl_entries = installed.get("plugins", {}).get("work-lifecycle@work-lifecycle", [])
+            wl_entries = installed.get("plugins", {}).get("core@core", [])
             wl_user = [e for e in wl_entries if isinstance(e, dict) and e.get("scope") == "user"]
             if wl_user:
                 shim_checked = True
