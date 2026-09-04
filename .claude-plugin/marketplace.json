@@ -1,0 +1,15 @@
+{
+  "$schema": "https://code.claude.com/schemas/marketplace.json",
+  "name": "publish",
+  "owner": { "name": "Lexi James", "url": "https://github.com/lexijamesesq" },
+  "metadata": { "description": "Skills for getting a change from a local checkout to GitHub: the publishing gate, house style checks, README conventions, the sample universe, and the configuration smoke test." },
+  "plugins": [
+    {
+      "name": "publish",
+      "source": "./",
+      "description": "Skills for getting a change from a local checkout to GitHub: the publishing gate, house style checks, README conventions, the sample universe, and the configuration smoke test.",
+      "license": "MIT",
+      "repository": "https://github.com/lexijamesesq/publish-skills"
+    }
+  ]
+}
