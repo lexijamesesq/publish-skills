@@ -148,7 +148,7 @@ def default_exemplars(cls: str | None) -> list[Path]:
     if cls == "playbook":
         paths: list[Path] = []
         for name in _EXEMPLAR_SKILLS:
-            pb_dir = SKILLS_DIR / name / "playbooks"
+            pb_dir = SCRIPT_DIR / "exemplars" / name / "playbooks"
             if pb_dir.is_dir():
                 paths.extend(sorted(pb_dir.glob("*.md")))
         return paths
