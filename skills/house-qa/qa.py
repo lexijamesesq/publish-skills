@@ -75,7 +75,10 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 SKILLS_DIR = SCRIPT_DIR.parent
 SAMPLE_UNIVERSE_DEFAULT = SKILLS_DIR / "sample-universe" / "universe.md"
 
-# The construction-standard exemplar trio (skill-quality-audit.md, 2026-07-07):
+# The construction-standard exemplar trio (skill-quality-audit.md, 2026-07-07),
+# vendored under exemplars/ as a frozen standard: they are core-marketplace
+# skills, no longer siblings of this file once house-qa moved to its own repo,
+# and a construction standard should not drift under the checker anyway.
 # SKILL.md 112/89/108 lines -> median 108; 15 playbooks 40-116 lines -> median ~79.
 # Resolved dynamically (file contents/counts, never hardcoded numbers) so the
 # median tracks the live corpus instead of drifting from it.
@@ -141,7 +144,7 @@ def default_exemplars(cls: str | None) -> list[Path]:
     built-in exemplar set yet (no corpus baseline established) — pass
     --exemplars explicitly for README-class checks."""
     if cls == "skill-md":
-        return [SKILLS_DIR / name / "SKILL.md" for name in _EXEMPLAR_SKILLS]
+        return [SCRIPT_DIR / "exemplars" / f"{name}.md" for name in _EXEMPLAR_SKILLS]
     if cls == "playbook":
         paths: list[Path] = []
         for name in _EXEMPLAR_SKILLS:
