@@ -1320,7 +1320,7 @@ def main():
                     if os.path.normpath(have_target) != os.path.normpath(want_target):
                         problems.append(
                             f"traffic-cone shim: {shim_path} -> {have_target}, but the currently "
-                            f"installed work-lifecycle resolves to {want_target} (re-run the "
+                            f"installed core resolves to {want_target} (re-run the "
                             f"traffic-cone-shim slice)"
                         )
 
