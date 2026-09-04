@@ -80,7 +80,7 @@ PYEOF
 # from the same dotty checkout). Post-cutover, hooks ship from the separate
 # estate-hooks@core plugin — this probe was silently broken
 # (confirmed live pre-rework: FAIL, hook missing at a path inside
-# work-lifecycle's own tree that was never where hooks lived). Resolves the
+# core-skills' own tree that was never where hooks lived). Resolves the
 # hook from the installed estate-hooks cache instead, scoped to a profile
 # where settings "hooks" is the literal {} shape (plugin-served).
 # ---------------------------------------------------------------------------
@@ -502,10 +502,10 @@ for profile, surfaces in sorted(state.items()):
 # EMPTY of plugin-served names, not full of declared ones.
 #
 # Reads dotty-private's plugins.json (the declared plugin-id list per
-# profile) rather than hardcoding work-lifecycle/estate-hooks, so it covers
+# profile) rather than hardcoding core/estate-hooks, so it covers
 # any future plugin (e.g. a future wiki/operator plugin) automatically IF
 # that plugin packages skills/agents at the same top-level skills/ +
-# agents/*.md layout work-lifecycle uses — a design assumption to confirm
+# agents/*.md layout core uses — a design assumption to confirm
 # when such a plugin ships, not a guarantee plugins.json itself establishes.
 # ---------------------------------------------------------------------------
 # Written to a temp file, not captured via "$(cat <<'PYEOF' ... )" like this
@@ -553,7 +553,7 @@ def skill_dirs(install_path):
     # serving from ".claude/skills/*") would otherwise be attributed zero
     # skills by this probe and report a silent, wrong PASS — exactly the
     # failure class this probe exists to catch. Falls back to the default
-    # skills/* glob only when the field is absent (work-lifecycle's own
+    # skills/* glob only when the field is absent (core's own
     # plugin.json today: no "skills" key).
     manifest_path = os.path.join(install_path, ".claude-plugin", "plugin.json")
     try:
@@ -1188,7 +1188,7 @@ probe_rules_claude_md_integrity() {
 
 # ---------------------------------------------------------------------------
 # Probe 9: plugin-marketplace-currency (new — incident-driven, LEX-694
-# postclose-e2e review: both Mini profiles served work-lifecycle 0.3.1 while
+# postclose-e2e review: both Mini profiles served work-lifecycle 0.3.1 (the plugin now named core) while
 # 0.4.0 was already released, and this suite reported 8/8 against that
 # two-versions-stale install — nothing here asserted currency at all, only
 # that whatever was installed was enabled and structurally wired. LEX-739
