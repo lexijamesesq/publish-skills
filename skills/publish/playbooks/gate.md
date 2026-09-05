@@ -143,4 +143,4 @@ This block is the P3/autonomous consumer's contract (publishing-gate-architectur
 
 - Does NOT invoke push/PR mechanics — SKILL.md's Push/PR flow section owns that, only on a `pass` verdict.
 - Does NOT fix any finding — every criterion here reports; the caller (or the composed skill's own review) edits.
-- Does NOT widen Decision Authority — a `pass` verdict here is data for the operator, never a standing authorization to skip her `permissions.ask` prompts.
+- Does NOT widen Decision Authority — a `pass` verdict here is data for the operator, never a standing authorization to push, open a PR, or merge on her behalf.
