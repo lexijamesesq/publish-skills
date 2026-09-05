@@ -1215,14 +1215,19 @@ probe_rules_claude_md_integrity() {
 #     original incident before it happened: the registry showed no
 #     autoUpdate key on ANY marketplace, for either profile, until this
 #     mechanism existed.
-# (b) traffic-cone shim currency (Done When #7 — no code defect found in the
-#     shim slice itself at LEX-739's pressure-test, but the operator gap is
-#     real: the shim needs an explicit re-run to re-resolve after ANY
-#     version change, and autoUpdate means a version can now change with no
-#     operator-invoked apply/bootstrap at all to remind them). Re-derives
-#     the shim's own resolution (traffic-cone-shim.sh's header, this
-#     script's existing cross-repo-path precedent from probes 7/8) and
-#     compares against the live symlink target.
+# (b) traffic-cone shim shape. The shim used to be a symlink pinned to one
+#     versioned cache directory, so this probe compared its target against
+#     the registered version (the shim went stale on every update). Since
+#     2026-09-04 the shim is a declared WRAPPER FILE that resolves the
+#     installed version at every invocation (dotty-private
+#     traffic-cone-shim.sh header), so staleness is impossible by
+#     construction. What can still go wrong, and what this checks, each
+#     independently: the fixed path is missing, or is still the pre-wrapper
+#     symlink (a machine whose shim slice has not re-applied), or its sha256
+#     differs from the declared source in the blueprint dir (probe 8's
+#     declared-vs-installed pattern), or the registered core version has no
+#     traffic-cone script for the wrapper to exec. A registry with no
+#     core@core entry is an ERROR, never a silent pass.
 #
 # What this probe deliberately does NOT do: compare an installed plugin's
 # version/commit against the marketplace's highest RELEASE TAG, despite that
@@ -1243,6 +1248,7 @@ probe_rules_claude_md_integrity() {
 # own network check with a strictly worse, offline substitute).
 # ---------------------------------------------------------------------------
 PY_MARKETPLACE_CURRENCY_CHECK="$(cat <<'PYEOF'
+import hashlib
 import json
 import os
 import sys
@@ -1253,9 +1259,19 @@ def load_json(path):
         return json.load(f)
 
 
+def sha256_of(path):
+    # hex digest, or None when the file is missing/unreadable (probe 8's helper)
+    try:
+        with open(path, "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()
+    except Exception:
+        return None
+
+
 def main():
     profiles_root, plugins_state_path = sys.argv[1], sys.argv[2]
     plugins_state = load_json(plugins_state_path)
+    blueprint_dir = os.path.dirname(os.path.abspath(plugins_state_path))
 
     problems = []
     checked_mechanism = 0
@@ -1296,10 +1312,11 @@ def main():
                     f"live registry resolves it to {have!r} (mechanism not armed)"
                 )
 
-        # (b) traffic-cone shim currency, once (not per profile — one shim,
-        # one PATH). core@core's scope:user installPath
-        # is the shim's declared resolution target (traffic-cone-shim.sh
-        # header); check it against whichever profile resolves first.
+        # (b) traffic-cone shim shape, once (not per profile — one shim, one
+        # PATH). The shape checks branch on what the path is (symlink /
+        # missing / a file, then executable + sha256 vs the declared wrapper
+        # in the blueprint dir); the registered-core check runs on every
+        # path, independent of the wrapper's state.
         if not shim_checked:
             try:
                 installed = load_json(installed_path)
@@ -1310,22 +1327,40 @@ def main():
             wl_user = [e for e in wl_entries if isinstance(e, dict) and e.get("scope") == "user"]
             if wl_user:
                 shim_checked = True
-                want_target = os.path.join(
-                    wl_user[0].get("installPath", ""), "skills", "traffic-cone", "scripts", "traffic-cone"
-                )
-                if not os.path.islink(shim_path):
-                    problems.append(f"traffic-cone shim: {shim_path} is not a symlink (or missing)")
+                install_path = wl_user[0].get("installPath", "")
+                want_target = os.path.join(install_path, "skills", "traffic-cone", "scripts", "traffic-cone")
+                declared_wrapper = os.path.join(blueprint_dir, "traffic-cone", "traffic-cone")
+                declared_sha = sha256_of(declared_wrapper)
+                if declared_sha is None:
+                    print(f"ERROR\tdeclared traffic-cone wrapper unreadable at {declared_wrapper} (staleness — the blueprint's declared file moved)")
+                    sys.exit(1)
+                if os.path.islink(shim_path):
+                    problems.append(
+                        f"traffic-cone shim: {shim_path} is still a symlink -> {os.readlink(shim_path)} "
+                        f"(pre-wrapper shape, pinned to one version); run: traffic-cone-shim.sh apply"
+                    )
+                elif not os.path.isfile(shim_path):
+                    problems.append(f"traffic-cone shim: {shim_path} is missing; run: traffic-cone-shim.sh apply")
                 else:
-                    have_target = os.readlink(shim_path)
-                    if os.path.normpath(have_target) != os.path.normpath(want_target):
+                    if not os.access(shim_path, os.X_OK):
+                        problems.append(f"traffic-cone shim: {shim_path} is not executable; run: traffic-cone-shim.sh apply")
+                    have_sha = sha256_of(shim_path)
+                    if have_sha != declared_sha:
                         problems.append(
-                            f"traffic-cone shim: {shim_path} -> {have_target}, but the currently "
-                            f"installed core resolves to {want_target} (re-run the "
-                            f"traffic-cone-shim slice)"
+                            f"traffic-cone shim: {shim_path} sha256 {have_sha} does not match the declared "
+                            f"wrapper {declared_sha}; run: traffic-cone-shim.sh apply"
                         )
+                if not (os.path.isfile(want_target) and os.access(want_target, os.X_OK)):
+                    problems.append(
+                        f"traffic-cone shim: the registered core ({install_path}) has no executable "
+                        f"traffic-cone script for the wrapper to exec"
+                    )
 
     if checked_mechanism == 0:
         print("ERROR\t0 marketplace autoUpdate declarations checked (parse failure or nothing declared)")
+        sys.exit(1)
+    if not shim_checked:
+        print("ERROR\tno core@core scope:user entry in any profile registry — the traffic-cone wrapper was never examined")
         sys.exit(1)
 
     if problems:
@@ -1335,7 +1370,7 @@ def main():
 
     print(
         f"OK\t{checked_mechanism} marketplace autoUpdate declarations armed correctly, "
-        f"traffic-cone shim current"
+        f"traffic-cone wrapper in place"
     )
     sys.exit(0)
 
