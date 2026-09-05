@@ -26,9 +26,9 @@ Runs the one gate a change crosses before it reaches public GitHub. Composes `/h
 **Health metrics — must NOT degrade.**
 - False-pass rate = 0 (publishing-gate-architecture.md's non-negotiable) — a clean verdict on a repo with an actual leak, oversized artifact, or exploitable finding is the one failure this skill cannot have.
 - cwd-independence: every check runs against the target repo passed as an argument (`git -C <target>`), never the session's own cwd — the executable-path lesson, structural now, not advisory.
-- Decision Authority stays narrow: this skill reports; it never pushes, merges, or bypasses a `permissions.ask` prompt on its own authority.
+- Decision Authority stays narrow: this skill reports; it never pushes, merges, or opens a PR on its own authority — those stay session acts outside this skill.
 
-**Strategic context.** publishing-gate-architecture.md's P1 phase — human mode, Decision Authority narrow, the operator consumes the verdict (`permissions.ask`). P2 (shadow calibration against operator judgment) and P3 (autonomous mode on the gateway Pi) are later phases this skill does not build.
+**Strategic context.** publishing-gate-architecture.md's P1 phase — human mode, Decision Authority narrow, the operator consumes the verdict (a governed-path PR is hers to merge; required GitHub checks gate the rest). P2 (shadow calibration against operator judgment) and P3 (autonomous mode on the gateway Pi) are later phases this skill does not build.
 
 **Constraints.**
 - **Hard:** cwd-independence — the gate takes a target repo path; it never assumes the session's own repo is the target. Human mode only; no autonomous publish path exists here.
@@ -36,7 +36,7 @@ Runs the one gate a change crosses before it reaches public GitHub. Composes `/h
 
 **Decision authority.**
 - **Autonomous:** running the gate; reporting the verdict at its derived pass/fail per criterion.
-- **Escalate:** verdict FAIL → stop, report findings, do not proceed to push/PR. Repo visibility unrecognized → ask before choosing a push/PR path. Every `permissions.ask`-gated action (push, PR create, merge) still prompts — unchanged.
+- **Escalate:** verdict FAIL → stop, report findings, do not proceed to push/PR. Repo visibility unrecognized → ask before choosing a push/PR path. Push and PR-create no longer prompt locally — required GitHub checks gate them; PR-merge on a governed path stays the operator's own act (session convention until CODEOWNERS closes the gap on GitHub's side).
 
 **Stop rules.**
 - Verdict FAIL → no push/PR guidance beyond the findings; the operator resolves and re-runs.
@@ -63,7 +63,7 @@ Full rubric, commands, and verdict schema live in `playbooks/gate.md`. Each step
 
 ## Push/PR flow (only on PASS)
 
-Per global CLAUDE.md § GitHub: branch → commit → push → PR → merge for every repo, public and private alike, every step still prompting via `permissions.ask` — `dotty-private` enforces PR-only via a branch-protection ruleset like the rest, no direct-push exception. This skill orchestrates up to the verdict — it does not touch push/PR mechanics or bypass a single prompt.
+Per global CLAUDE.md § GitHub: branch → commit → push → PR → merge for every repo, public and private alike — `dotty-private` enforces PR-only via a branch-protection ruleset like the rest, no direct-push exception. Push and PR-create are no longer locally prompted; required GitHub checks gate them, and PR-merge on a governed path stays the operator's own act until CODEOWNERS closes that gap for good. This skill orchestrates up to the verdict — it does not touch push/PR/merge mechanics itself.
 
 ## What this skill does NOT do
 
