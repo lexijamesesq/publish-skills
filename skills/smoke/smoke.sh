@@ -1187,11 +1187,11 @@ probe_rules_claude_md_integrity() {
 }
 
 # ---------------------------------------------------------------------------
-# Probe 9: plugin-marketplace-currency (new — incident-driven, LEX-694
+# Probe 9: plugin-marketplace-currency (new — incident-driven, a
 # postclose-e2e review: both Mini profiles served work-lifecycle 0.3.1 (the plugin now named core) while
 # 0.4.0 was already released, and this suite reported 8/8 against that
 # two-versions-stale install — nothing here asserted currency at all, only
-# that whatever was installed was enabled and structurally wired. LEX-739
+# that whatever was installed was enabled and structurally wired. A later ticket
 # built the actual currency mechanism (settings-declared `autoUpdate` on
 # `extraKnownMarketplaces`, the CLI's own highest-precedence gate for its
 # background plugin-marketplace updater) and this probe closes the same gap
@@ -1205,7 +1205,7 @@ probe_rules_claude_md_integrity() {
 # (a) Mechanism check, the load-bearing one. Reads live known_marketplaces.
 #     json (never `claude plugin marketplace list --json`, which projects
 #     name/source/repo/installLocation and NOT lastUpdated/autoUpdate —
-#     verified live, LEX-739 pressure-test) against each profile's live
+#     verified live via pressure-test) against each profile's live
 #     settings.json extraKnownMarketplaces (the declared, highest-precedence
 #     source). Every marketplace WE declare an autoUpdate value for must
 #     show that exact value in the runtime registry — true for the three

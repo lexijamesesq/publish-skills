@@ -1,0 +1,39 @@
+{
+  "exemptions": [
+    {
+      "path": "CLAUDE\\.md",
+      "rule": "sample-shape",
+      "reason": "this repo's skills documentation references consumer projects' own CLAUDE.md and Claude Code's runtime settings.json as concepts throughout (e.g. what /smoke probes) — it never ships either as a repo-committed operator config"
+    },
+    {
+      "path": "settings\\.json",
+      "rule": "sample-shape",
+      "reason": "same as the CLAUDE.md entry above: /smoke documents Claude Code's own runtime settings.json as a probe target, never a repo-committed operator config this repo ships"
+    },
+    {
+      "path": "skills/house-qa/qa\\.py",
+      "rule": "vault-path-leak",
+      "reason": "qa.py's own forbidden-pattern regex definitions (VAULT_ABS_PATH_RE, BARE_VAULT_DIR_RE) — a temporary duplicate of house-code's detection logic pending its own retirement — name the literal directory shapes they detect, the same way house-code.py names its own patterns"
+    },
+    {
+      "path": "skills/house-qa/tests/fixtures/targets/ticket-leak/SKILL\\.md",
+      "rule": "ticket-id-leak",
+      "reason": "deliberate fixture proving qa.py's own ticket-id-leak detection"
+    },
+    {
+      "path": "skills/house-qa/tests/fixtures/targets/vault-path-leak/SKILL\\.md",
+      "rule": "vault-path-leak",
+      "reason": "deliberate fixture proving qa.py's own vault-path-leak detection"
+    },
+    {
+      "path": "skills/house-qa/tests/run_tests\\.py",
+      "rule": "ticket-id-leak",
+      "reason": "exercises qa.py's own ticket-id-leak detection; asserts specific ticket-shaped values are flagged, not a leaked reference"
+    },
+    {
+      "path": "skills/house-qa/tests/run_tests\\.py",
+      "rule": "vault-path-leak",
+      "reason": "exercises qa.py's own vault-path-leak detection; asserts a specific vault-path-shaped value is flagged, not a leaked location"
+    }
+  ]
+}
