@@ -266,8 +266,8 @@ tracked_stripped=$(printf '%s\n' "${TRACKED}" | while read -r p; do b=$(basename
 # either marker to get the basename the sample stands in for.
 sample_basenames=$(printf '%s\n' "${TRACKED}" | { grep -E '\.(sample|example)\.' || true; } | while read -r p; do basename "$p"; done | sed -E 's/\.(sample|example)(\.[^.]+)$/\2/' | sort -u)
 # `cat` errors loudly on a tracked entry that's a symlink to a directory
-# (git tracks the link, not its target's contents) -- found live on LEX-702:
-# a repo with a symlinked plugin-component subset (later moved to real
+# (git tracks the link, not its target's contents) -- found live in a repo
+# with a symlinked plugin-component subset (later moved to real
 # files, but the class of bug stands for any tracked directory-symlink)
 # made this step's `xargs -I{} cat {}` fail, and under this script's
 # `pipefail` the whole scaffold check aborted silently mid-run with no
