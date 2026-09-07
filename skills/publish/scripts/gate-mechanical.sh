@@ -124,50 +124,69 @@ verdict() { # verdict <PASS|FAIL> <detail>
 
 TRACKED="$(git -C "${TARGET}" ls-files)"
 
-# ---- Shared: PII sweep of tracked HEAD content --------------------------
-# Same engine as gate criterion 5 — never a session-improvised list, and no
-# pattern drift: a hand-rolled regex loop over the same TOML proved stricter
-# than gitleaks itself (it ignored per-rule case flags and allowlists).
-# Semantics differ from criterion 5 deliberately: this sweeps TRACKED content
-# at HEAD (git archive → scratch tree), i.e. exactly what a push publishes. A
-# raw --no-git working-tree scan is wrong in both directions — it sweeps
-# gitignored files whose whole job is to hold secrets (.env), and untracked
-# scratch that a push never ships. A pattern introduced then scrubbed within
-# the branch lives only in history, which is criterion 5's range scan — and
-# on public repos that correctly forces a history cleanup before publish.
-# With a repo .gitleaks.toml the full extend-chain + allowlists apply
-# (gl_preflight resolves the relative [extend] token against the fixed
-# install path — see git-hooks/gitleaks-common.sh).
+# ---- Shared: whole-tree secret/PII sweep of the tracked HEAD tree -------
+# The dry-run verb's tree step and the estate's whole-tree leak
+# floor (the former standalone whole-tree sweep) are one scan, and — by ruling — ONE
+# implementation: `gl_scan_tree_at` in the estate's gitleaks-common.sh, the
+# same function the native pre-push hook calls. It sweeps the TRACKED tree at
+# HEAD — exactly what a push ships — reading every blob DIRECTLY via
+# `git cat-file` (never `git archive`, which honours .gitattributes
+# export-ignore, a real blind spot); symlink blobs (mode 120000) land as plain
+# files holding the target-path bytes, so the payload is scanned and the link
+# is never followed. A raw --no-git working-tree scan is wrong in both
+# directions (it sweeps gitignored secret holders like .env and untracked
+# scratch a push never ships); the HEAD tree is the correct set. A pattern
+# introduced then scrubbed within the branch lives only in history — out of
+# this whole-tree floor's scope.
+#
+# TRUSTED-LANE PARITY: gl_scan_tree_at runs base rules + the operator overlay
+# from its FIXED install path (GL_MANDATORY_CONFIG, via gl_mandatory_preflight)
+# — NEVER the repo's own PR-controlled .gitleaks.toml, and a repo
+# .gitleaksignore is neutralised. This is exactly what the native pre-push
+# scanner and the trusted CI lane run. So a local PASS with a routine-lane
+# (base-only) FAIL is a defect to report; a local FAIL with a routine PASS is
+# expected — the overlay adds operator-only coverage base-only CI does not run,
+# not a defect (holds while the overlay only adds rules, no suppressing allowlist).
 #
 # Computed once, here, because Step 1's conditional-allowlist rule (2026-07-10
 # ruling — gate.md § Criteria 1) and Step 4 both need the same result.
 #
 # FAIL CLOSED on scan errors. The estate standard for this class (pre-push)
-# is fail-closed; a swallowed gitleaks error (e.g. an unresolvable [extend]
-# when the operator ruleset is not installed at the fixed path) must never
-# read as a clean sweep — that fail-open would flow into BOTH consuming
-# steps. gitleaks exit codes: 0 = clean scan, 1 = leaks found, >1 = error.
-# An unparseable/missing report on rc<=1 is also a scan anomaly → closed.
+# is fail-closed; a missing/malformed overlay (gl_mandatory_preflight refuses)
+# or a swallowed gitleaks error must never read as a clean sweep — that
+# fail-open would flow into BOTH consuming steps. gitleaks exit codes: 0 =
+# clean, 1 = leaks found, >1 = error. An unparseable/missing report on
+# rc<=1 is also a scan anomaly → closed.
 PII_SWEEP_STATUS=""
 PII_SWEEP=""
 PII_SWEEP_ERR=""
-RULES="${TARGET}/.gitleaks.toml"
-if [[ ! -f "${RULES}" ]]; then
-  PII_SWEEP_STATUS="no_config"
-elif ! command -v gitleaks >/dev/null; then
+if ! command -v gitleaks >/dev/null; then
   PII_SWEEP_STATUS="no_gitleaks"
+elif ! declare -F gl_scan_tree_at >/dev/null 2>&1; then
+  # No fallback, by design: the whole-tree scan has ONE
+  # implementation — gl_scan_tree_at in the estate's gitleaks-common.sh, the
+  # same function the native pre-push hook calls. If the resolved copy predates
+  # it, fail CLOSED naming what is needed rather than silently reimplementing
+  # the scan here (a second copy is the drift this consolidation removed).
+  PII_SWEEP_STATUS="scan_error"
+  PII_SWEEP_ERR="gl_scan_tree_at not in the resolved gitleaks-common.sh — update estate-hooks to the release that carries the shared whole-tree scan"
+elif ! gl_mandatory_preflight; then
+  # Trusted-lane parity: base rules + the operator overlay from its FIXED
+  # install path, never the repo's PR-controlled .gitleaks.toml — exactly what
+  # the native pre-push scanner and the trusted CI lane run. A missing/malformed
+  # overlay refuses (gl_block already printed the cause); fail closed.
+  PII_SWEEP_STATUS="scan_error"
+  PII_SWEEP_ERR="operator overlay unavailable (gl_mandatory_preflight refused)"
 else
-  HEAD_TREE="$(mktemp -d)"
-  git -C "${TARGET}" archive HEAD | tar -x -C "${HEAD_TREE}"
+  # The single shared whole-tree scan. gl_scan_tree_at materializes the tracked
+  # HEAD tree via `git cat-file` (no `git archive` export-ignore blind spot),
+  # neutralises a PR-authored .gitleaksignore, scans under base+overlay
+  # (GL_MANDATORY_CONFIG), and writes the JSON report. 0 = clean, 1 = findings,
+  # 2 = scanner error — the same codes the parser below already handles.
   GL_REPORT="$(mktemp)"
   GL_RC=0
-  if gl_preflight "${RULES}"; then
-    (cd "${HEAD_TREE}" && gitleaks detect --source . --no-git --config "${GL_EFFECTIVE_CONFIG}" --no-banner --redact --ignore-gitleaks-allow --report-format json --report-path "${GL_REPORT}" >/dev/null 2>&1) || GL_RC=$?
-  else
-    # gl_preflight already printed a cause-specific gl_block to stderr.
-    GL_RC=2
-  fi
-  rm -f "${GL_TMP_CONFIG}" 2>/dev/null || true
+  gl_scan_tree_at "${TARGET}" "${GL_REPORT}" HEAD || GL_RC=$?
+  rm -f "${GL_MANDATORY_TMP:-}" 2>/dev/null || true
   if [[ ${GL_RC} -gt 1 ]]; then
     PII_SWEEP_STATUS="scan_error"
     PII_SWEEP_ERR="gitleaks exit ${GL_RC}"
@@ -201,7 +220,7 @@ PYEOF
       PII_SWEEP_STATUS="ok"
     fi
   fi
-  rm -rf "${HEAD_TREE}" "${GL_REPORT}"
+  rm -f "${GL_REPORT}"
 fi
 
 # ---- Step 1: Scaffold --------------------------------------------------
@@ -230,9 +249,6 @@ if echo "${TRACKED}" | grep -qE 'fixtures?/|samples?/|golden|Evals?/'; then
         else
           verdict FAIL $'content-bearing, no allowlist, and tracked HEAD content trips operator patterns:\n'"${PII_SWEEP}"
         fi
-        ;;
-      no_config)
-        verdict FAIL "content-bearing, no allowlist, and no gitleaks config found to run the fallback sweep"
         ;;
       no_gitleaks)
         verdict FAIL "content-bearing, no allowlist, and gitleaks not installed to run the fallback sweep"
@@ -371,9 +387,6 @@ step "4. PII sweep (gitleaks operator patterns, HEAD content)"
 # Sweep computed once, above (shared with Step 1's conditional-allowlist
 # check) — semantics documented there.
 case "${PII_SWEEP_STATUS}" in
-  no_config)
-    verdict FAIL "no gitleaks config found (expected ${TARGET}/.gitleaks.toml)"
-    ;;
   no_gitleaks)
     verdict FAIL "gitleaks not installed"
     ;;
