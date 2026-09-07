@@ -56,7 +56,7 @@ advisory:                        # reported for the author; NEVER affects `verdi
   house_qa_review:  {verdict: KEEP|SIMPLIFY|REWORK, notes: [...]}
   code_review:      {findings: [...]}
   security_review:  {status: reviewed|skipped, findings: [...]}
-pr_body_lint: {status: pass|fail|not-supplied, findings: [...]}   # structural lint of a supplied pr-body:v1
+pr_body_lint: {status: pass|fail|not-supplied, findings: [...]}   # structural lint of a supplied pr-body:v1; the '<!-- pr-body:v1 -->' marker (first line) is REQUIRED — a body missing it is FAIL, never pass
 ```
 
 A future autonomous consumer reads `verdict` directly; human mode reads it as the per-check dry-run report. Either way `verdict` derives from `reported` only.
