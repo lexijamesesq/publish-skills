@@ -29,6 +29,16 @@ if "/volumes" not in a and "mounted volume" not in a:
 if "~/repos" not in a and "home path" not in a:
     fail.append("agents/pr-reviewer.md: confinement must forbid home paths (~/…)")
 
+# 1b. the confinement must scope to PR EVIDENCE and explicitly carve out the
+#     reviewer's own card/skill under the plugin root. Without this the clause
+#     reads as forbidding a reviewer from loading its own playbook (which sits
+#     under CLAUDE_CONFIG_DIR / $HOME in the runtime), and all six reviewers
+#     returned 'incomplete' on the canary PR. Guard both directions.
+if "for pr evidence" not in a and "for evidence" not in a:
+    fail.append("agents/pr-reviewer.md: confinement must scope to PR evidence (else it blocks own-card loading)")
+if not (("own card" in a or "own reviewer files" in a) and "permitted" in a):
+    fail.append("agents/pr-reviewer.md: must explicitly permit reading the reviewer's own card/skill (plugin-root carve-out)")
+
 # 2. no reviewer surface may tell the model to 'grep the repo' (bare) — it must
 #    say the working-directory checkout, so "the repo" can never mean the disk
 for f in SURFACES:
