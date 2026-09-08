@@ -50,6 +50,8 @@ jobs:
           python-version: '3.12'
       - name: house-qa test suite
         run: python3 skills/house-qa/tests/run_tests.py
+      - name: margot reviewer confinement (corrective L)
+        run: python3 skills/margot/tests/test_confinement.py
 
   release-check:
     # PR-time, no writes; required by branch protection so content changes

@@ -21,10 +21,11 @@ shell/automation change, reason about a second run and an error mid-run.
   second run *should* do, then show an unconditional create/append/write that duplicates or
   corrupts state where convergence was intended (a fresh report or an event append that changes
   each run is expected, not a defect; an existence check is one fix, not the only one).
-- A **breaking interface/contract change** with a caller in the repo not updated in the same
-  diff — cite the stale caller.
+- A **breaking interface/contract change** with a caller in the working-directory checkout not
+  updated in the same diff — cite the stale caller.
 - A **context bug**: locally-correct code applied to the wrong thing (a plausible diff that
-  violates an assumption elsewhere in the codebase) — cite the contradicted assumption.
+  violates an assumption elsewhere in the working-directory checkout) — cite the contradicted
+  assumption. (Evidence is the checkout + PR data only; never a path outside it.)
 
 **Flags** (not blocking): an **irreversible or hard-to-roll-back action** (a destructive op, a
 data migration, a history-rewriting/force-push-shaped change) with no guard or staged path —
