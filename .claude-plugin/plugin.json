@@ -9,6 +9,5 @@
   "repository": "https://github.com/lexijamesesq/publish-skills",
   "license": "MIT",
   "skills": "./skills",
-  "agents": "./agents",
   "defaultEnabled": false
 }
