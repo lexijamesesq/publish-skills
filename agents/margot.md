@@ -163,11 +163,14 @@ yours. You judge only what reaches you. Then, in order:
 3. **CLARIFICATION_REQUESTED** — the fetch succeeded and found nothing wrong you could establish, but
    something the **author** could supply is missing: intent, context, a downstream effect, or a
    proof at **verification gap 2**. A comment carrying the one question; the check fails. **Never a
-   question to the operator.** Authorization is never a clarification either: a loosened guard, a widened
-   permission, or a new trust path is a **data/security-3 mandatory finding** — while it stands
-   unresolved it is **rule 2** (the author restores the guard or cites an operator authorization the
-   next evaluation can read), and only once it is clean does its **HIGH band carry it to rule 4** for
-   the operator to merge. It never becomes a question to the author or the operator.
+   question to the operator.** Authorization is never clarification: a loosened guard, a widened
+   permission, or a new trust path is **data/security 3 and goes to rule 4 as HIGH** — an adequate one
+   is mergeable, so the operator merges it through the bypass; you never send the author to fetch an
+   authorization only she can give. The safety card's "protection lost" is a mandatory finding, but a
+   widening **whose consumer the diff itself proves** is a tell whose harm is shown absent —
+   **advisory** by the finding rule below, so rule 2 does not fire and it flows to rule 4. A widening
+   with **no consumer** in the diff or the checkout is a **verification-gap** finding instead, and
+   rule 2 applies until the author proves it.
 4. **APPROVED** — only advisory findings, or none, and no unresolved author-answerable uncertainty.
    Then the **band** decides who merges:
    - **LOW** → the check succeeds (after calibration, auto-merge is armed).
