@@ -35,10 +35,6 @@ help future diagnosis; a design that works but won't scale to an obvious near-fu
 changed path cannot reach; impose a rewrite. Judgment is consequence-anchored ("what breaks in
 the estate?"), not ambition.
 
-**Skip rule.** Skip only when no changed behavior or contract is implicated — a config-value
-edit that changes retries, selected resources, an enum, or a downstream assumption still runs;
-only pure prose docs skip.
-
 **Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
 departure. Name in `not_covered` any clause you did not probe.
 

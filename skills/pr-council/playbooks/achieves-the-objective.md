@@ -10,7 +10,9 @@ body.
 **Fetch your own evidence.** Fetch the Linear ticket and its parent map directly via the
 Linear MCP (`getIssueById`, then the parent map issue) — read the `## Objective` and
 `## Done When`, and the map's Destination if the ticket is a map child. Judge against the
-outcome, not the mechanics. (2-level cascade cap: ticket → parent map, stop there.)
+outcome, not the mechanics. (2-level cascade cap: ticket → parent map, stop there.) With no
+resolvable ticket URL, record `ticket/map coverage unavailable — no ticket` and still check the
+description↔diff alignment — a missing ticket is a disclosed gap, never a pass.
 
 **Insists on** (demonstrable, blocks):
 - The diff produces an artifact but a `Done When` condition is not actually met by it — name
@@ -31,10 +33,6 @@ bar).
 
 **Never.** Re-judge whether the ticket was the right goal (Objective is fixed); grade
 mechanical correctness (that is `works-and-proven` and `principal-engineer`).
-
-**Skip rule.** You run on every PR (never a file-skip). With no resolvable ticket URL you
-record "ticket/map coverage unavailable — no ticket" and still check description↔diff
-alignment; you never decide the human route — the gate owns routing.
 
 **Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget. The
 departure is the fetch, not the count: the ticket-to-parent-map cascade caps at two levels, so

@@ -15,8 +15,9 @@ You are the law of the `pr-reviewer` agent — the council Margot spawns, one re
 in its own fresh context. This SKILL.md carries what is common across the six; your card under
 `playbooks/` carries what is specific to yours, and governs where the two overlap.
 
-You judge one pull request you did not author. You emit no verdict — you return findings, Margot
-decides. You post nothing and you fix nothing.
+You judge one pull request you did not author. You emit no verdict, and **you never score risk and
+never decide an outcome** — you return findings, and Margot scores the risk band and decides the
+outcome from every card together. You post nothing and you fix nothing.
 
 ## What Margot gives you
 
@@ -82,14 +83,19 @@ clean pass is silence; a finding is a reproducible defect. An `insists on` claus
 
 Every finding names a location — `file:line`, or a check name — and a consequence. A claim that
 cannot name both is a note, not a finding. State confidence as an evidence category, never a
-probability: **HIGH** the evidence establishes the defect, **MEDIUM** a material assumption remains
-open, **LOW** plausible but undecided.
+probability: **HIGH** — the diff itself proves the defect; **MEDIUM** — an inference one probe would
+settle; **LOW** — a suspicion, plausible but undecided.
 
 ## Your probe budget
 
 **One probe per `insists on` clause, then stop.** Go deep on each rather than multiplying findings
 within a clause to pad the count. A card states a number only where it departs from this — read your
 card's stopping rule for its own budget before assuming this one.
+
+Your budget covers **each distinct changed behavior** the diff introduces, not each changed line —
+run each clause's probe across those behaviors, not once for the whole PR. A **consequential path you
+leave uncovered** — a changed behavior whose risk your probes did not reach — makes your completion
+**`incomplete`**, never a clean pass; name it below.
 
 When you stop, name in `not_covered` what you did not probe and why. "Did not probe the dependency
 clause; no manifest or lockfile changed" is a valid entry. Silence on a clause is not.

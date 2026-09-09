@@ -1,21 +1,22 @@
 #!/usr/bin/env python3
 """Contract guard for the two result schemas.
 
-The first proof run's verdict crashed the poster: `completion` came back a string
-where a dict was expected, and no fenced schema existed anywhere for the model to
-copy — the contract lived only as an inline prose key list. Both schemas are now
-fenced at their producer, and this test pins them:
+The first proof run's verdict crashed the poster: a field came back a string
+where a structured value was expected, and no fenced schema existed anywhere for
+the model to copy — the contract lived only as an inline prose key list. Both
+schemas are now fenced at their producer, and this test pins them:
 
   * the AGGREGATE, in agents/margot.md — the object Margot returns and a
-    deterministic poster reads.
+    deterministic poster reads. Two axes: `outcome` (adequacy) and `risk`
+    (authority, a {band, R, vector} object). No `verdict` and no `completion`
+    dict — an incomplete summoned card is ERROR, and `checked` is the sole
+    completeness signal (one non-empty entry per summoned card).
   * the PER-CARD result, in skills/pr-council/SKILL.md — what one reviewer
     returns to Margot.
 
-The literal key lists below are this side of a cross-repo anchor. A test in this
-repository cannot read the poster that consumes the aggregate, so the runtime
-slice adds a fixture mirroring THIS list on the poster's side. Until it does, the
-keys are pinned here only, and a rename that crosses the repo boundary is caught
-by nothing.
+The literal key lists below are this side of a cross-repo anchor. The poster
+(dotty-private) mirrors AGGREGATE_KEYS in its own schema eval; keep the two
+byte-in-sync so a rename that crosses the repo boundary is caught on both sides.
 
 Usage: python3 skills/pr-council/tests/test_schema.py
 """
@@ -29,8 +30,12 @@ MARGOT = ROOT / "agents" / "margot.md"
 SKILL = ROOT / "skills" / "pr-council" / "SKILL.md"
 
 AGGREGATE_KEYS = [
-    "verdict", "risk", "risk_reason", "rationale", "author_action", "surface",
-    "findings", "skips", "completion", "checked", "ticket",
+    "outcome", "risk", "risk_reason", "rationale", "authority", "clarification",
+    "summoned", "not_summoned", "checked", "findings", "dismissals", "ticket",
+]
+RISK_KEYS = ["band", "R", "vector"]
+VECTOR_KEYS = [
+    "blast_radius", "reversibility", "data_security", "operations", "verification_gap",
 ]
 AGGREGATE_FINDING_KEYS = [
     "reviewers", "clause", "location", "sentence", "severity", "confidence",
@@ -73,6 +78,15 @@ if agg_blocks:
     agg = agg_blocks[0]
     if list(agg) != AGGREGATE_KEYS:
         fail.append(f"agents/margot.md: aggregate keys are {list(agg)}, expected {AGGREGATE_KEYS}")
+    # risk is the authority axis: a {band, R, vector} object; vector is a NAMED
+    # object of the five dimensions so a positional mistake cannot mis-score one.
+    risk = agg.get("risk")
+    if not isinstance(risk, dict) or list(risk) != RISK_KEYS:
+        fail.append(f"agents/margot.md: risk must be an object with keys {RISK_KEYS}")
+    else:
+        vec = risk.get("vector")
+        if not isinstance(vec, dict) or list(vec) != VECTOR_KEYS:
+            fail.append(f"agents/margot.md: risk.vector must be a named object with keys {VECTOR_KEYS}")
     # the poster builds its per-card lines from findings[].reviewers as a LIST —
     # a finding carrying a bare `reviewer` string is silently dropped from them
     finding = (agg.get("findings") or [{}])[0]
@@ -80,20 +94,20 @@ if agg_blocks:
         fail.append("agents/margot.md: findings[].reviewers must be a list")
     if list(finding) != AGGREGATE_FINDING_KEYS:
         fail.append(f"agents/margot.md: finding keys are {list(finding)}, expected {AGGREGATE_FINDING_KEYS}")
-    # completion is a dict card -> status. The contract is that only 'completed'
-    # renders green; the poster's own else-branch still paints an incomplete card
-    # green until the runtime slice fixes it, so this pins the shape, not that rule.
-    comp = agg.get("completion")
-    if not isinstance(comp, dict):
-        fail.append("agents/margot.md: completion must be a dict of card name to status")
-    elif sorted(comp) != sorted(CARD_NAMES):
-        fail.append(f"agents/margot.md: completion names {sorted(comp)}, expected {sorted(CARD_NAMES)}")
-    # checked is the only carrier that gets the six Checked blocks into the run log
+    # summoned is the list of cards that ran; not_summoned carries the ❓ fact per
+    # card that did not — never rendered green.
+    if not isinstance(agg.get("summoned"), list):
+        fail.append("agents/margot.md: summoned must be a list of card names")
+    ns = (agg.get("not_summoned") or [{}])[0]
+    if sorted(ns) != ["card", "fact"]:
+        fail.append(f"agents/margot.md: not_summoned[] keys are {sorted(ns)}, expected ['card', 'fact']")
+    # checked is the sole completeness signal — one non-empty entry per summoned card
     if not isinstance(agg.get("checked"), dict):
         fail.append("agents/margot.md: checked must be a dict of card name to probe list")
-    skip = (agg.get("skips") or [{}])[0]
-    if sorted(skip) != ["reason", "reviewer"]:
-        fail.append(f"agents/margot.md: skips[] keys are {sorted(skip)}, expected ['reason', 'reviewer']")
+    # appeals: a dismissed finding carries its reason back for calibration
+    dis = (agg.get("dismissals") or [{}])[0]
+    if sorted(dis) != ["finding", "reason"]:
+        fail.append(f"agents/margot.md: dismissals[] keys are {sorted(dis)}, expected ['finding', 'reason']")
     if not isinstance(agg.get("ticket"), dict) or "id" not in (agg.get("ticket") or {}):
         fail.append("agents/margot.md: ticket must be an object carrying an id")
 

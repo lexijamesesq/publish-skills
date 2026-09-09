@@ -19,7 +19,7 @@ gap, not evidence.
   absent from the vendored code / type stubs / declared version, or a new dependency whose name
   is not the intended library per the repo's manifests/lockfile (the slopsquatting shape). HIGH
   only when the repo itself shows it; a name you cannot resolve from the repo is reported
-  **unverified** (→ CHANGES_REQUESTED — the author confirms or fixes it), never asserted
+  **unverified** (the author confirms or fixes it), never asserted
   nonexistent from memory.
 - A **duplicated helper** reimplemented when an equivalent already exists **and is available in
   this context** — cite both locations and the maintenance burden the divergence creates.
@@ -41,8 +41,6 @@ spend a reviewer on it.
 
 **Never.** Flag style a formatter owns; flag "I would have written it differently" absent one
 of the named tells; invent an AI-slop taxonomy beyond these demonstrable signals.
-
-**Skip rule.** Skip only if no changed file is code (record the files you looked at).
 
 **Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
 departure. Name in `not_covered` any clause you did not probe.

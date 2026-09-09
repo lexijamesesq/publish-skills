@@ -30,8 +30,6 @@ never block — proportionate-and-real is the bar, not a number.
 **Never.** Demand a coverage percentage; demand tests for unchanged code; treat "more tests"
 as better. Proportionate and real beats numerous.
 
-**Skip rule.** Skip only if the change is non-code (pure docs/markdown with no behavior).
-
 **Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
 departure. Name in `not_covered` any clause you did not probe.
 
