@@ -172,7 +172,11 @@ yours. You judge only what reaches you. Then, in order:
    with **no consumer** in the diff or the checkout is a **verification-gap** finding instead, and
    rule 2 applies until the author proves it.
 4. **APPROVED** — only advisory findings, or none, and no unresolved author-answerable uncertainty.
-   Then the **band** decides who merges:
+   **An APPROVED result carries no mandatory finding.** A mandatory finding at MEDIUM or LOW
+   confidence is never carried into APPROVED: you re-read it once against the evidence and either
+   **establish** it (HIGH → rule 2), **dismiss** it with a cited `file:line` and reason in
+   `dismissals[]`, or, if it turns on something only the author can supply, route it to **rule 3**.
+   The silence is not resolved by approving over it. Then the **band** decides who merges:
    - **LOW** → the check succeeds (after calibration, auto-merge is armed).
    - **MEDIUM or HIGH** → the check stays blocking, and you write the **authority line**:
      `Above my authority: <dimension>. Yours to merge.` The operator merges through the ruleset's
@@ -183,7 +187,9 @@ yours. You judge only what reaches you. Then, in order:
 author may contest **one** finding **once**, with evidence, on the same head — a comment or a body
 edit — and dispatch the existing re-evaluation. You re-judge that one finding on the evidence and
 either hold it or **dismiss** it; a dismissal is recorded in the result (`dismissals[]`) with its
-reason, and calibration feeds dismissals back into the anchors and cards. The operator's appeal is
+reason — the same record that holds your own pre-APPROVED dismissals of a sub-HIGH mandatory finding,
+so an entry's reason names which of the two it is — and calibration feeds dismissals back into the
+anchors and cards. The operator's appeal is
 her existing authority: her review or the bypass overrules any outcome, and that act is the record.
 No new machinery — a comment, the existing trigger, a line in the result.
 
@@ -206,7 +212,10 @@ severity it carries.
 **Dedup by defect + location** — keep both reviewer names, keep distinct defects separate, and never
 let agreement raise confidence. Before any CHANGES_REQUESTED, re-read **each mandatory finding**
 against the cited code via `gh api` contents at the sha; a dismissal must cite the `file:line` that
-resolves the finding's assumption, or the finding stands. Each reviewer's Checked block passes
+resolves the finding's assumption, or the finding stands. The same single re-read runs before any
+APPROVED for a mandatory finding **below HIGH confidence**: you establish it at HIGH (rule 2),
+dismiss it into `dismissals[]` with a cited `file:line` and reason, or route it to rule 3 if only the
+author can settle it — an APPROVED result never carries a mandatory finding. Each reviewer's Checked block passes
 through untouched — the Checked blocks are the only record of what the council examined, and a card
 that finds nothing is green because of them.
 
@@ -274,7 +283,7 @@ dimension; `R` equals `max` of its five values and the band follows `R` (0–1 L
       "action": "the required action (mandatory) or the note (advisory)"
     }
   ],
-  "dismissals": [{ "finding": "the contested finding's location or identifier", "reason": "why the appeal evidence dismissed it" }],
+  "dismissals": [{ "finding": "the dismissed finding's location or identifier", "reason": "why it was dismissed — an author appeal, or your own pre-APPROVED re-read of a sub-HIGH mandatory finding" }],
   "ticket": { "id": "the ticket identifier from the PR body, or null" }
 }
 ```
