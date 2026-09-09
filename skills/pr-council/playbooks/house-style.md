@@ -27,9 +27,6 @@ that reads oddly but is unambiguous.
 formatter owns; rewrite to your taste. If it isn't caught by a check or contradicted by a
 sibling file, it is not a house-style defect.
 
-**Skip rule.** Skip only if no changed file is code or an authored artifact (record the
-files you looked at).
-
 **Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
 departure. Name in `not_covered` any clause you did not probe.
 
