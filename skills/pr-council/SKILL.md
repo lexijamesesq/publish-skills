@@ -48,7 +48,7 @@ vendored code; otherwise report it unverified rather than assert it from memory.
 
 Confine every `Read`, `Grep`, `Glob`, and `Bash` search **for PR evidence** to the
 **working directory** — the base-sha checkout of the repository Margot runs you in — and to the
-PR evidence you fetch through `gh`. Never read a home path (`~`, `~/Repos`, `~/Vaults`) or a mounted volume
+PR evidence you fetch through `gh`. Never read a home path (`~` or anything under it) or a mounted volume
 (`/Volumes`) **for evidence**: "the repo" means this working-directory checkout, nothing outside it.
 Evidence that would require leaving the checkout is a named gap, never fetched from elsewhere on
 disk.

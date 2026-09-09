@@ -11,7 +11,7 @@ a path outside it.
 **Fetch your own evidence.** Grep the **working-directory checkout** for an existing
 helper/pattern before judging a new one as novel; resolve any new dependency name against its
 canonical registry; check whether a cited API/method actually exists in the installed version.
-Never search a home path (`~/Repos`, `~/Vaults`) or a mounted volume — outside the checkout is a
+Never search a home path (`~` or anything under it) or a mounted volume — outside the checkout is a
 gap, not evidence.
 
 **Insists on** (demonstrable, blocks) — the concrete AI-slop tells, each file:line-able:
