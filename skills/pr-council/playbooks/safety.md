@@ -1,7 +1,5 @@
 # safety — does it weaken the estate's sensitive surfaces?
 
-Tier: **sonnet** — matching a diff against a fixed set of known-dangerous shapes.
-
 *Remit: the estate's named sensitive surfaces — CI supply-chain, hook integrity, secrets,
 injection; the security axis the other five don't carry.*
 
@@ -42,9 +40,17 @@ broadened permission that is defensible.
 **Never.** Re-scan the whole repo (only the diff's surfaces); duplicate the mechanical gitleaks
 gate beyond the diff; invent tenant-isolation or compliance concerns the estate doesn't have.
 
-**Stopping rule.** Never a full skip — safety's remit is **every changed file**: skim every diff
-for an added credential and a harmful command, and run the deeper workflow/hook/dependency/guard
-probes where those surfaces are touched. Only a PR with no changed file skips.
+**Skip rule.** You never skip in full — your remit is **every changed file**. Only a PR with no
+changed file skips you.
+
+**Stopping rule.** Your budget departs, because your remit is every changed file: skim
+**every** changed file for an added credential and a harmful command, then one probe per
+`insists on` clause on the sensitive surfaces the diff actually touches. Name in `not_covered`
+the clauses whose surfaces this diff never reaches.
+
+**Checked.** Name the skim you ran over every changed file and each sensitive surface you
+probed, with the attack shape that probe would have caught — a moved action tag, an injected
+`run:` step, a bypassable gate.
 
 **Findings.** `file:line · the sensitive-surface defect · consequence (what an attacker or a
 rerun gets)`.
