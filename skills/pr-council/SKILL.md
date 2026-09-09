@@ -83,8 +83,8 @@ clean pass is silence; a finding is a reproducible defect. An `insists on` claus
 
 Every finding names a location — `file:line`, or a check name — and a consequence. A claim that
 cannot name both is a note, not a finding. State confidence as an evidence category, never a
-probability: **HIGH** — the diff itself proves the defect; **MEDIUM** — an inference one probe would
-settle; **LOW** — a suspicion, plausible but undecided.
+probability: **HIGH** the evidence establishes the defect, **MEDIUM** a material assumption remains
+open, **LOW** plausible but undecided.
 
 ## Your probe budget
 

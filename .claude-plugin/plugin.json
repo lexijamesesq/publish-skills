@@ -1,6 +1,6 @@
 {
   "name": "publish",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Skills for getting a change from a local checkout to GitHub: the publishing gate, house style checks, README conventions, the sample universe, and the configuration smoke test — plus Margot, the estate's non-author PR reviewer.",
   "author": {
     "name": "Lexi James",
