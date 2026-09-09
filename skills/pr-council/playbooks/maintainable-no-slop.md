@@ -1,7 +1,5 @@
 # maintainable-no-slop — is it free of the concrete AI-slop tells?
 
-Tier: **sonnet** — recognizing named slop signals in a diff against the repo.
-
 *Remit: demonstrated maintenance harm from AI-slop tells — duplication, needless indirection,
 obscured failure, misleading comments; her maintainability / "would a senior approve this"
 objective, judged by concrete cost, never taste.*
@@ -44,7 +42,13 @@ spend a reviewer on it.
 **Never.** Flag style a formatter owns; flag "I would have written it differently" absent one
 of the named tells; invent an AI-slop taxonomy beyond these demonstrable signals.
 
-**Stopping rule.** Skip only if no changed file is code (record the files you looked at).
+**Skip rule.** Skip only if no changed file is code (record the files you looked at).
+
+**Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
+departure. Name in `not_covered` any clause you did not probe.
+
+**Checked.** Name each grep of the working-directory checkout you ran before judging something
+novel, and the duplicated helper or reimplemented pattern it would have caught.
 
 **Findings.** `file:line · the named slop signal (+ the second location for a duplication) ·
 consequence`.

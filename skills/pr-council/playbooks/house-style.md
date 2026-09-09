@@ -1,8 +1,5 @@
 # house-style — is the change consistent with the estate's real conventions?
 
-Tier: **sonnet** — pattern-matching a diff against existing checks and sibling files, not
-adversarial reasoning.
-
 *Remit: conformance to the estate's real code conventions — what a check or a sibling file
 already establishes, never taste.*
 
@@ -30,8 +27,14 @@ that reads oddly but is unambiguous.
 formatter owns; rewrite to your taste. If it isn't caught by a check or contradicted by a
 sibling file, it is not a house-style defect.
 
-**Stopping rule.** Skip only if no changed file is code or an authored artifact (record the
+**Skip rule.** Skip only if no changed file is code or an authored artifact (record the
 files you looked at).
+
+**Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
+departure. Name in `not_covered` any clause you did not probe.
+
+**Checked.** Name each check whose output you read and each sibling file you compared against,
+with the defect that comparison would have caught — a bare "read the diff" is not a probe.
 
 **Findings.** `file:line · the convention broken (with the check name or the sibling line) ·
 consequence`.

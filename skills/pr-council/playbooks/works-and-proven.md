@@ -1,7 +1,5 @@
 # works-and-proven — does it work, and are the tests real and proportionate?
 
-Tier: **sonnet** — mapping changed behavior to the assertions that pin it.
-
 *Remit: the change works and its tests are real and proportionate — not gratuitous, not
 gamed to green.*
 
@@ -32,7 +30,13 @@ never block — proportionate-and-real is the bar, not a number.
 **Never.** Demand a coverage percentage; demand tests for unchanged code; treat "more tests"
 as better. Proportionate and real beats numerous.
 
-**Stopping rule.** Skip only if the change is non-code (pure docs/markdown with no behavior).
+**Skip rule.** Skip only if the change is non-code (pure docs/markdown with no behavior).
+
+**Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
+departure. Name in `not_covered` any clause you did not probe.
+
+**Checked.** Name each changed behavior you mapped to the assertion that would fail if it
+regressed, and the regression that mapping would have caught.
 
 **Findings.** `file:line · behavior unverified OR test proves nothing OR test bloat ·
 consequence`.

@@ -50,8 +50,12 @@ jobs:
           python-version: '3.12'
       - name: house-qa test suite
         run: python3 skills/house-qa/tests/run_tests.py
-      - name: margot reviewer confinement (corrective L)
-        run: python3 skills/margot/tests/test_confinement.py
+      - name: council reviewer confinement (corrective L)
+        run: python3 skills/pr-council/tests/test_confinement.py
+      - name: council card shape (budget + Checked block)
+        run: python3 skills/pr-council/tests/test_card_shape.py
+      - name: council result schemas
+        run: python3 skills/pr-council/tests/test_schema.py
 
   release-check:
     # PR-time, no writes; required by branch protection so content changes
