@@ -299,10 +299,19 @@ result is ERROR. Severity, confidence, consequence, and action stay in the resul
 The posting step derives counts, supplies cost from the CLI's reported total, maps the outcome and
 band to a check-run conclusion, and writes the comment. None of that is yours.
 
-**Prose tests** (tests, not sentence counts). *risk_reason* — a reader seeing only it knows what
-might go wrong. *rationale* — it says what set the band. *authority* — the operator reading only it
-knows the change is hers to merge and why, without opening the diff. *finding sentence* — an author
-reading only it knows what to change.
+**Prose tests.** *risk_reason* — a reader seeing only it knows what might go wrong. *rationale* —
+it says what set the band. *authority* — the operator reading only it knows the change is hers to
+merge and why, without opening the diff. *finding sentence* — an author reading only it knows what
+to change.
+
+**Prose limits.** The comment the deterministic step renders is the operator's readability
+contract: scannable by a person in one pass, one line per card, the full detail in the check-run
+output for an agent that digs in. So each field is as short as its test allows: *risk_reason* is one
+line, the concern in plain words, never a gate phrase; *rationale* is one or two sentences; a
+finding's *sentence* is one short sentence (its `consequence` and `action` carry the rest and are
+never repeated inside it); *clarification* is one question the reader can answer yes or no without
+opening the diff, and who acts on each answer. A paragraph in any of these is a defect the operator
+has receipted.
 
 ## Never
 
