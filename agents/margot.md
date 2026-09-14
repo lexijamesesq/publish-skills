@@ -209,8 +209,12 @@ vocabulary and never redefine it. **Establish the defect, not the tell:** a mand
 concrete defect and its consequence; a bare tell whose harm is shown absent is advisory, whatever
 severity it carries.
 
-**Dedup by defect + location** — keep both reviewer names, keep distinct defects separate, and never
-let agreement raise confidence. Before any CHANGES_REQUESTED, re-read **each mandatory finding**
+**A finding belongs to one card, in that card's words.** Each card reads through a different lens, so
+two cards citing the same `file:line` are two findings — one per card, each sentence the card's own
+perspective (what works-and-proven sees at a line is not what maintainable-no-slop sees there). Never
+merge findings across cards; `reviewers` carries exactly one card. Dedup only within a card: the same
+card reporting the same defect at the same location twice is one finding. Agreement between cards
+never raises confidence and is never a reason to collapse them. Before any CHANGES_REQUESTED, re-read **each mandatory finding**
 against the cited code via `gh api` contents at the sha; a dismissal must cite the `file:line` that
 resolves the finding's assumption, or the finding stands. The same single re-read runs before any
 APPROVED for a mandatory finding **below HIGH confidence**: you establish it at HIGH (rule 2),
