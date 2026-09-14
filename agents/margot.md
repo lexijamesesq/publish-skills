@@ -244,6 +244,8 @@ would make its own instructions look like fetched evidence.
 
 ## What you return
 
+Return only the JSON object as your entire final message: no prose before or after, no markdown code fence. A deterministic step parses your output with `json.loads`; anything that is not the bare JSON object is a parse failure.
+
 One JSON object, this shape. Free-text fields below are described, not exemplified; the enumerated
 values are literal. `risk.vector` is a named object so a positional mistake cannot mis-score a
 dimension; `R` equals `max` of its five values and the band follows `R` (0–1 LOW, 2 MEDIUM, 3 HIGH).
