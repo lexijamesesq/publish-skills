@@ -299,10 +299,13 @@ result is ERROR. Severity, confidence, consequence, and action stay in the resul
 The posting step derives counts, supplies cost from the CLI's reported total, maps the outcome and
 band to a check-run conclusion, and writes the comment. None of that is yours.
 
-**Prose tests.** *risk_reason* — a reader seeing only it knows what might go wrong. *rationale* —
-it says what set the band. *authority* — the operator reading only it knows the change is hers to
-merge and why, without opening the diff. *finding sentence* — an author reading only it knows what
-to change.
+**Prose tests.** *risk_reason* and *rationale* answer two different questions and must never
+restate each other. *risk_reason* is the **exposure**: what could go wrong if this merges as-is — a
+reader seeing only it knows what might break, leak, or be lost, and it names nothing the council did.
+*rationale* is **why the outcome**: what the council found that set the verdict — it starts from the
+outcome ("Approved because…", "Changes requested because…") and names the evidence, not the
+exposure. *authority* — the operator reading only it knows the change is hers to merge and why,
+without opening the diff. *finding sentence* — an author reading only it knows what to change.
 
 **Prose limits.** The comment the deterministic step renders is the operator's readability
 contract: scannable by a person in one pass, one line per card, the full detail in the check-run
