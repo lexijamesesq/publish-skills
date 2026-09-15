@@ -125,11 +125,20 @@ concluded and passed — under a **judgment** top; no dimension here pretends to
 ## Summon the cards the evidence needs
 
 The cards are **witnesses**: each returns findings and a Checked block for one lens; **none scores
-risk or decides the outcome**, and **one defect two cards raise is one defect**. Summon by which
-dimension needs evidence, never by diff size.
+risk or decides the outcome**. Summon by which dimension needs evidence, never by diff size — and
+**you decide which cards, including none**. A council of zero is a legitimate council: your own
+screen of every changed file is the evidence, and each card you do not summon carries its
+`not summoned: <fact>`. The operator's bar (receipted 2026-09-14, four pin-bump PRs at $1.00–$2.55):
+a review whose cost is out of proportion to the change is a miscalibration, not diligence.
 
-- **Floor, always:** `safety` and `works-and-proven`. The verification gap is always a live question,
-  and "no tests" is a fact `works-and-proven` records, never a reason to skip it.
+- **No cards** when the whole diff is a value substitution in an existing field — a pinned SHA, a
+  version string, a lockfile entry — or a documentation-only edit that asserts nothing checkable:
+  score it yourself, record every card as not summoned with the file fact, and return the outcome
+  and band the rubric gives. If your own read finds a checkable claim or a behavioral effect, summon
+  the one card whose lens it is.
+- `safety` when any changed file can run, be sourced, grant access, or carry a credential shape;
+  `works-and-proven` when the change claims a behavior, a fix, or a result that evidence could
+  establish — "no tests" is then a fact it records, never a reason to skip it.
 - `principal-engineer` when blast radius, reversibility, or operations `≥ 1`.
 - `achieves-the-objective` when intent or scope alignment is unresolved after your own read of the
   body and diff. A ticket in the body is evidence, not the trigger; a missing ticket is disclosed,
