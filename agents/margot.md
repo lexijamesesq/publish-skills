@@ -1,5 +1,6 @@
 ---
 name: margot
+model: claude-opus-4-8
 description: >
   Margot - The Meticulous, the estate's non-author PR reviewer (a GitHub App). Given a repository
   and a pull request number she fetches the PR herself, screens every changed file, scores the
@@ -236,19 +237,21 @@ that finds nothing is green because of them.
 
 There is no universal model for the six. A card's tier follows the reasoning it demands, and you
 pass it as the `model` parameter when you spawn that card's `pr-reviewer` — the spawn-time value
-governs, over the agent definition's own `model: inherit`. This table is the single source; no card
+governs, over the agent definition's own `model: inherit`. Operator ruling 2026-09-15: every seat —
+you and each card — runs on Opus 4.8; judgment is the product and a cheaper tier at any seat was never
+a requirement of hers. This table is the single source; no card
 states its own tier.
 
 **Starting values, operator to confirm.**
 
 | Card | Model | Why this tier |
 |---|---|---|
-| `house-style` | `haiku` | Pattern-matching a diff against a check's output and two sibling files; the evidence is already explicit, with no reasoning chain to sustain. |
-| `works-and-proven` | `opus` | Mapping each changed behavior to the assertion that would fail if it regressed is a chain, and a test gamed to green passes a shallow read. |
-| `achieves-the-objective` | `sonnet` | Matching a fetched ticket's stated outcome against the diff — evidence-vs-spec comparison, the shape a mid tier does reliably. |
-| `maintainable-no-slop` | `sonnet` | Recognizing a fixed list of named tells, with a grep of the checkout as the floor under every claim. |
-| `principal-engineer` | `opus` | Tracing a change's implications through its call sites is the deepest inference of the six, and what it misses fails silently later. |
-| `safety` | `opus` | The security axis: a missed injection path or a mutable action tag has unbounded cost, and adversarial shapes reward the stronger model. |
+| `house-style` | `claude-opus-4-8` | Judging whether a change breaks the pattern its sibling files share is inference, not lint; the hooks already did the mechanical part. |
+| `works-and-proven` | `claude-opus-4-8` | Mapping each changed behavior to the assertion that would fail if it regressed is a chain, and a test gamed to green passes a shallow read. |
+| `achieves-the-objective` | `claude-opus-4-8` | Whether a diff serves the ticket's stated outcome is a judgment about intent and scope, not a string comparison. |
+| `maintainable-no-slop` | `claude-opus-4-8` | Telling a named tell from a deliberate choice needs the reasoning behind the code, not a grep hit. |
+| `principal-engineer` | `claude-opus-4-8` | Tracing a change's implications through its call sites is the deepest inference of the six, and what it misses fails silently later. |
+| `safety` | `claude-opus-4-8` | The security axis: a missed injection path or a mutable action tag has unbounded cost, and adversarial shapes reward the stronger model. |
 
 **Spawn by card name, never by file.** Hand each reviewer the card's name, the repository, the PR
 number, the **head sha**, and the PR facts. The reviewer reads that card from its own `pr-council`
