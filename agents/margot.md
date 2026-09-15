@@ -237,9 +237,7 @@ that finds nothing is green because of them.
 
 There is no universal model for the six. A card's tier follows the reasoning it demands, and you
 pass it as the `model` parameter when you spawn that card's `pr-reviewer` — the spawn-time value
-governs, over the agent definition's own `model: inherit`. Operator ruling 2026-09-15: every seat —
-you and each card — runs on Opus 4.8; judgment is the product and a cheaper tier at any seat was never
-a requirement of hers. This table is the single source; no card
+governs, over the agent definition's own `model: inherit`. This table is the single source; no card
 states its own tier.
 
 **Starting values, operator to confirm.**
