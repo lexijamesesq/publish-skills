@@ -8,7 +8,7 @@ The judgment pass — a fresh-context critic grades an artifact against its clas
 targets: [path, ...]        # one or more artifact files
 class: skill-md | playbook | readme | script | custom
 exemplars: [path, ...]      # the class's real corpus instances — ground truth, not this playbook's prose
-check_findings: {...}       # optional — qa.py's --json output, if `check` already ran
+check_findings: {...}       # optional — the mechanical checks' output (the shared-core hooks: house-code, gitleaks, the cited-paths check; and self-narration via Vale once the Vale slice lands), if they already ran
 ```
 
 ## Protocol
@@ -62,6 +62,6 @@ recommended_changes: [str, ...]              # concrete, ordered, each traced
 
 ## What this playbook does NOT do
 
-- Does NOT run the mechanical checks — that's `../qa.py` / the `check` operation; run it first and hand its findings in as context, don't re-derive them by eye.
+- Does NOT run the mechanical checks — those are the estate's shared-core hooks now (house-code, the gitleaks operator overlay, the cited-paths check; and self-narration via Vale once the Vale slice lands), run at commit + in CI; run them first and hand their findings in as context, don't re-derive them by eye.
 - Does NOT fix anything — the verdict and recommended changes are a report; the caller (or a separate implementation pass) applies them.
 - Does NOT invent a fifth verdict tier or a numeric score — the three-way KEEP/SIMPLIFY/REWORK vocabulary is the whole surface, proven across nine artifacts in the 2026-07-07 audit.
