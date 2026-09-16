@@ -134,6 +134,12 @@ Every card runs on **`claude-opus-4-8`** — pass it as the `model` when you spa
 Hand each reviewer the card name, the repository, the PR number, the **head sha**, and the PR facts;
 the reviewer loads that card from its own `pr-council` skill. Hand the name, never the card's text.
 
+**Spawn every summoned card in ONE concurrent batch — all `Agent` calls in a single turn, never one
+at a time.** The cards are independent by construction — each a fresh context that never sees another,
+deduped only after they return — so a batch is a pure latency win: an N-card council takes about as
+long as its *slowest* card, not the sum of all of them. Never wait for one card to return before
+spawning the next; a review that spawns serially costs Σ of the cards where it should cost ≈ max.
+
 ## The outcome, in order
 
 The workflow's preflight refuses a draft, a fork head, a merge conflict, or a change over 1,000
