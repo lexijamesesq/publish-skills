@@ -74,7 +74,7 @@ Do not add a tenth probe without a new failure (or a map-ruled exception, declar
 
 ## What this skill does NOT do
 
-- Does NOT fix anything it finds — report only, same discipline as `/lint-knowledge` and `/house-qa`.
+- Does NOT fix anything it finds — report only, same discipline as `/lint-knowledge`.
 - Does NOT run on any schedule or session boundary automatically — invocation is always explicit, per the cadence convention above.
 - Does NOT replace `/lint-knowledge`'s periodic content-health pass — `lint-suite` here only proves the *test suite* still passes, not that the corpus itself is clean; run `/lint-knowledge` separately for that.
 - Does NOT audit MCP servers or general plugin state — of the blueprint's plugin domain this skill checks only the three specific gaps probes 6, 7, and 9 close (a plugin silently disabled while a profile depends on it to serve hooks; the full declared-plugin set not enabled+installed per profile; the marketplace auto-update mechanism not actually armed despite being declared); everything else `/system-blueprint` governs stays `/system-blueprint`'s. The permanent, general-purpose audit for plugin state is a separate later effort — probes 6, 7, and 9 are the interim detectors.

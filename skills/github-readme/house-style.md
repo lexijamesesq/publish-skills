@@ -1,6 +1,6 @@
 # README House Style
 
-The canonical spine, strings, and register for project READMEs in this estate. Consumers — `/github-readme`, `/house-qa`, any session authoring a README — reference this file. Nothing here is restated elsewhere; amend here, nowhere else.
+The canonical spine, strings, and register for project READMEs in this estate. Consumers — `/github-readme`, any session authoring a README — reference this file. Nothing here is restated elsewhere; amend here, nowhere else.
 
 Derived from three exemplars: Metrics, Home Assistant, Incubator. Wiki and dotty are governed by this file, not sources for it.
 
@@ -92,7 +92,7 @@ Length is not a bright line — it scales with how many artifacts the repo ships
 
 **Grouping follows inventory size, not preference.** A repo shipping a handful of artifacts groups them by kind — `### Skills`, `### Supporting files` — and needs nothing more. Once the inventory is large enough that "kind" stops being the axis a reader navigates by, group by **function** instead: `### Session orchestration`, `### Knowledge layer`, `### Enrichment`. Non-invocable files may still take a kind group at the end.
 
-**Invocable artifacts carry the slash in their name** — `/publish`, `/refine-seed`. The name then carries the invocation, which is why no README in this corpus has a Trigger column. Never add a column whose value is derivable from another column.
+**Invocable artifacts carry the slash in their name** — `/refine-seed`, `/lint-knowledge`. The name then carries the invocation, which is why no README in this corpus has a Trigger column. Never add a column whose value is derivable from another column.
 
 **A group gets an intro sentence only where its heading does not already say when to reach for it.** In the largest exemplar, three of eight groups have one. An intro that restates its heading is filler.
 

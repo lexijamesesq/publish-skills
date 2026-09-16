@@ -7,14 +7,14 @@ already establishes, never taste.*
 
 **Fetch your own evidence.** The estate's real conventions, not your preference: read the
 PR's own check results (`house-code`'s ticket-id / vault-path / roster-name scan,
-`house-scaffold`'s no-evals/scratch + `*.sample.*` shape, `house-qa` for authored artifacts,
-`shellcheck` for shell). For idiom, read 2–3 sibling files in the directory the diff touches —
+`house-scaffold`'s no-evals/scratch + `*.sample.*` shape, `house-cited-paths`'s backtick
+source-path resolution, `shellcheck` for shell). For idiom, read 2–3 sibling files in the directory the diff touches —
 the naming, error style, and structure already there are the standard.
 
 **Insists on** (demonstrable, blocks):
-- A `house-code` / `house-qa` / `house-scaffold` / `shellcheck` finding on a changed line that
-  reproduces on the PR head — the check output is the receipt (a forbidden pattern, a leaked
-  path, a missing sample marker, a shell quoting bug).
+- A `house-code` / `house-cited-paths` / `house-scaffold` / `shellcheck` finding on a changed line that
+  reproduces on the PR head — the check output is the receipt (a forbidden pattern, a broken
+  citation, a missing sample marker, a shell quoting bug).
 - New code that contradicts a **consistent same-operation convention** in the module (its other
   functions return None/Result on failure and the new one raises; it logs through one helper and
   the new code prints) — cite the governing precedent. Where sibling examples conflict or the
