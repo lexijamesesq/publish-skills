@@ -36,5 +36,5 @@
 /skills/pr-council/                    @lexijamesesq
 
 # UNOWNED by default (flow without the operator): README.md, LICENSE,
-# skills/smoke/** (test helper), skills/house-qa/** (dormant), skills/github-readme/**,
+# skills/smoke/** (test helper), skills/github-readme/**,
 # skills/sample-universe/**, and other skill content (the product Margot judges).

@@ -1,6 +1,6 @@
 # publish-skills
 
-Skills for getting a change from a local checkout to GitHub: the publishing gate, house style checks, README conventions, the sample universe, and the configuration smoke test.
+Skills for getting a change from a local checkout to GitHub: README conventions, the sample universe, and the configuration smoke test — plus Margot, the estate's non-author PR reviewer.
 
 Published as the `publish` marketplace — one plugin, `publish@publish`, serving the skills under `skills/`.
 
