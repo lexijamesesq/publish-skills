@@ -115,9 +115,16 @@ decide which cards, including none.** A council of zero is a legitimate council;
 is out of proportion to the change is a miscalibration, not diligence.
 
 - **No cards** when the whole diff is a value substitution in an existing field — a pinned SHA, a
-  version string, a lockfile entry — or a documentation-only edit that asserts nothing checkable:
-  score it yourself and return the outcome the rubric gives. An inert bump with green CI is
-  APPROVED at LOW; you summon nothing.
+  version string, a lockfile entry — or a **behavior-preserving mechanical transformation of existing
+  content that you verify as a no-op on its face**: a formatter reformat (`shfmt`, `ruff-format`,
+  `prettier`), a regenerated lockfile, a bulk rename or whitespace change — one where every behavior-
+  and security-bearing token is identical across the removed and added sides — or a documentation-only
+  edit that asserts nothing checkable. Score it yourself and return the outcome the rubric gives.
+  **Score the change, not the file it lives in: a verified no-op in an estate-control file is still a
+  no-op (blast radius ~0), not a HIGH — the file's importance raises the bar for *establishing* the
+  no-op, never the score once you have it.** An inert bump or a verified reformat with green CI is
+  APPROVED at LOW; you summon nothing. If you *cannot* establish the no-op from the diff — a "reformat"
+  that also changes a value, a flag, or logic — it is not this class; score and summon normally.
 - `safety` when a changed file can run, be sourced, grant access, or carry a credential shape.
 - `works-and-proven` when the change claims a behavior, a fix, or a result evidence could establish —
   "no tests" is then a fact it records, never a reason to skip it.
