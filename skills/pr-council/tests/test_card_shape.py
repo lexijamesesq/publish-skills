@@ -18,6 +18,7 @@ second one. This test fails a card that reintroduces it.
 
 Usage: python3 skills/pr-council/tests/test_card_shape.py
 """
+
 import pathlib
 import re
 import sys
@@ -68,7 +69,9 @@ fail = []
 
 names = {p.stem for p in CARDS}
 if names != EXPECTED_CARDS:
-    fail.append(f"playbooks/: card set is {sorted(names)}, expected {sorted(EXPECTED_CARDS)}")
+    fail.append(
+        f"playbooks/: card set is {sorted(names)}, expected {sorted(EXPECTED_CARDS)}"
+    )
 
 for p in CARDS:
     text = p.read_text()
@@ -84,18 +87,41 @@ for p in CARDS:
         m = HEADING.match(line)
         prev_blank = i == 0 or lines[i - 1].strip() == ""
         if m and prev_blank and m.group(1) not in ALLOWED_HEADINGS:
-            fail.append(f"{rel}: carries a heading not in the allowed set: {m.group(1)!r}")
+            fail.append(
+                f"{rel}: carries a heading not in the allowed set: {m.group(1)!r}"
+            )
     # the tier table in agents/margot.md is the single source
     for line in text.splitlines():
         if line.startswith("Tier:"):
-            fail.append(f"{rel}: carries a 'Tier:' line — the tier table in agents/margot.md is the source")
+            fail.append(
+                f"{rel}: carries a 'Tier:' line — the tier table in agents/margot.md is the source"
+            )
     # a Checked section that doesn't ask for the detection target is not a probe rule
-    checked = text.split("**Checked.**", 1)[1].split("\n\n", 1)[0] if "**Checked.**" in text else ""
+    checked = (
+        text.split("**Checked.**", 1)[1].split("\n\n", 1)[0]
+        if "**Checked.**" in text
+        else ""
+    )
     if "would have caught" not in checked and "would have detected" not in checked:
-        fail.append(f"{rel}: the Checked section must ask for the failure each probe would have caught")
+        fail.append(
+            f"{rel}: the Checked section must ask for the failure each probe would have caught"
+        )
+    # the Findings section must carry the [issue|info] disposition-tag convention
+    # (the clause axis SKILL.md defines) — so a card silently reverting to the old
+    # bare `location · defect · consequence` shape is caught, not just the heading's
+    # presence. Pins the six-card alignment the way test_schema.py pins SKILL.md.
+    findings = text.split("**Findings.**", 1)[1] if "**Findings.**" in text else ""
+    if "[issue|info]" not in findings and not (
+        "[issue]" in findings and "[info]" in findings
+    ):
+        fail.append(
+            f"{rel}: the Findings section must carry the [issue|info] disposition tag (SKILL.md's clause axis)"
+        )
 
 for m in fail:
     print("FAIL:", m)
 if fail:
     sys.exit(1)
-print(f"OK: {len(CARDS)} council cards carry every required section, only allowed headings, a budget, and a Checked rule")
+print(
+    f"OK: {len(CARDS)} council cards carry every required section, only allowed headings, a budget, and a Checked rule"
+)
