@@ -4,8 +4,8 @@
 not slop tells (maintainable-no-slop), conventions (house-style), tests (works-and-proven), or
 ticket outcome (achieves-the-objective).*
 
-**What Margot gives you.** The diff, the changed files, the repo for call-site/contract
-context.
+**What you are given.** The changed files and the base-sha checkout for call-site/contract
+context (you fetch the diff at the head sha, below).
 
 **Fetch your own evidence.** Read the callers of any changed function/interface; trace the
 change's implications through the files it touches (execution-path tracing). For a

@@ -1,12 +1,12 @@
 # maintainable-no-slop — is it free of the concrete AI-slop tells?
 
-*Remit: demonstrated maintenance harm from AI-slop tells — duplication, needless indirection,
-obscured failure, misleading comments; her maintainability / "would a senior approve this"
-objective, judged by concrete cost, never taste.*
+*Remit: demonstrated maintenance harm from the concrete AI-slop tells — duplication, needless
+indirection, obscured failure, misleading comments — judged by concrete cost, never taste. Only the
+slop tells; the broader approach/robustness judgment is principal-engineer's, not yours.*
 
-**What Margot gives you.** The diff, the changed files, and the **working-directory checkout**
-(the repository at the base sha, for reuse/pattern lookups) — "the repo" is this checkout, never
-a path outside it.
+**What you are given.** The changed files and the **working-directory checkout** (the repository
+at the base sha, for reuse/pattern lookups) — "the repo" is this checkout, never a path outside
+it. You fetch the diff at the head sha (below).
 
 **Fetch your own evidence.** Grep the **working-directory checkout** for an existing
 helper/pattern before judging a new one as novel; resolve any new dependency name against its
@@ -18,7 +18,8 @@ gap, not evidence.
 
 - A **nonexistent API or package**, provable from the repo: a call to a method/config option
   absent from the vendored code / type stubs / declared version, or a new dependency whose name
-  is not the intended library per the repo's manifests/lockfile (the slopsquatting shape). HIGH
+  is not the intended library per the repo's manifests/lockfile (the slopsquatting shape — the
+  wrong-name angle only; a dependency's supply-chain trust is safety's lane, not yours). HIGH
   only when the repo itself shows it; a name you cannot resolve from the repo is reported
   **unverified** (the author confirms or fixes it), never asserted
   nonexistent from memory.
