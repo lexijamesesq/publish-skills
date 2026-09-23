@@ -131,13 +131,13 @@ Not covered:
 
 Findings:
 - [issue] <file:line, the check name, or the Done-When line> · severity=<BLOCKING|MAJOR|MINOR> · confidence=<HIGH|MEDIUM|LOW>
-    what: <one sentence — what is wrong and why it matters>
-    consequence: <what breaks, or what an attacker or a rerun gets>
-    action: <the required fix>
+    what: <ONE plain sentence a non-engineer understands — what is wrong in lay terms. No code, no file:line, no symbol names (the location above and the run carry those). This line is shown to a Product/Design leader.>
+    consequence: <for the run — what breaks, or what an attacker or a rerun gets; technical is fine>
+    action: <for the run — the required fix>
 - [info] <location> · severity=<BLOCKING|MAJOR|MINOR> · confidence=<HIGH|MEDIUM|LOW>
-    what: <one sentence>
-    consequence: <what the note is about>
-    note: <the advisory note>
+    what: <ONE plain sentence a non-engineer understands — the gist of the note; no code, no file:line>
+    consequence: <for the run — what the note is about>
+    note: <for the run — the advisory note>
 ```
 
 **The tag is the clause.** `[issue]` — an `insists on` finding: a reproducible, mandatory defect,
