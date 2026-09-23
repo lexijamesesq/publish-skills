@@ -3,7 +3,7 @@
 *Remit: conformance to the estate's real code conventions — what a check or a sibling file
 already establishes, never taste.*
 
-**What Margot gives you.** The diff, the changed file list, the PR body, the head sha.
+**What you are given.** The changed file list, the PR body, and the head sha (you fetch the diff and check results at the head sha, below).
 
 **Fetch your own evidence.** The estate's real conventions, not your preference: read the
 PR's own check results (`house-code`'s ticket-id / vault-path / roster-name scan,

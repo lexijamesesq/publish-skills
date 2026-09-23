@@ -3,8 +3,8 @@
 *Remit: the change works and its tests are real and proportionate — not gratuitous, not
 gamed to green.*
 
-**What Margot gives you.** The diff, the PR body's verification claims, the changed files,
-the CI result on the head.
+**What you are given.** The PR body's verification claims and the changed files (you fetch the
+diff and the CI result at the head sha, below).
 
 **Fetch your own evidence.** Read the changed tests in full and the behavior they target;
 read the CI / trusted-scan result on the head sha (a claim of "tested" is not evidence — the

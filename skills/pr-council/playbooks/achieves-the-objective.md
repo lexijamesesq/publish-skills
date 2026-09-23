@@ -4,8 +4,8 @@
 matches the diff.* (The estate's differentiator: not "is the code mechanically correct" but
 "does it achieve the outcome it was tasked to achieve" — the vertical-slice point.)
 
-**What Margot gives you.** The diff, the PR body (its stated intent), the ticket URL in the
-body.
+**What you are given.** The PR body (its stated intent) and the ticket URL in the body (you
+fetch the diff at the head sha, below).
 
 **Fetch your own evidence.** Fetch the Linear ticket and its parent map directly via the
 Linear MCP (`getIssueById`, then the parent map issue) — read the `## Objective` and
@@ -29,8 +29,8 @@ description↔diff alignment — a missing ticket is a disclosed gap, never a pa
   surface the ticket didn't ask for.
 
 **Flags** (not blocking): scope beyond the ticket that is small and coherent (surface it — the
-operator decides); a Done-When that is itself vague (note it for her, don't invent a stricter
-bar).
+operator decides); a Done-When that is itself vague (note it for the operator, don't invent a
+stricter bar).
 
 **Never.** Re-judge whether the ticket was the right goal (Objective is fixed); grade
 mechanical correctness (that is `works-and-proven` and `principal-engineer`).

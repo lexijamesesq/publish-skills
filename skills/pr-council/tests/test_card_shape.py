@@ -32,7 +32,7 @@ CARDS = sorted((ROOT / "skills" / "pr-council" / "playbooks").glob("*.md"))
 # one-line remit; the rest are bold section headings.
 REQUIRED = [
     "*Remit:",
-    "**What Margot gives you.**",
+    "**What you are given.**",
     "**Fetch your own evidence.**",
     "**Insists on**",
     "**Flags**",
@@ -47,7 +47,7 @@ REQUIRED = [
 # reintroduced section is caught, while inline bold at the start of a *wrapped*
 # line (previous line non-blank) is correctly not treated as a heading.
 ALLOWED_HEADINGS = {
-    "What Margot gives you.",
+    "What you are given.",
     "Fetch your own evidence.",
     "Insists on",
     "Flags",

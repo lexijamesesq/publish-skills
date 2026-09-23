@@ -3,7 +3,7 @@
 *Remit: the estate's named sensitive surfaces — CI supply-chain, hook integrity, secrets,
 injection; the security axis the other five don't carry.*
 
-**What Margot gives you.** The diff, the changed files, the PR author identity.
+**What you are given.** The changed files and the PR author identity (you fetch the diff and evidence at the head sha, below).
 
 **Fetch your own evidence.** For a workflow/action change, read the action refs and the `run:`
 steps; for a hook change, check whether the same rule has a server-side/CI backstop; check any
