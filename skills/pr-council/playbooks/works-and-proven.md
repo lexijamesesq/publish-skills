@@ -11,6 +11,7 @@ read the CI / trusted-scan result on the head sha (a claim of "tested" is not ev
 passing run is). Map each changed public behavior to the test that would fail if it regressed.
 
 **Insists on** (demonstrable, blocks):
+
 - A changed behavior that carries a **concrete regression risk** with no proportionate proof —
   no test *and* no other verification (static or existing) pins it; name the behavior and the
   regression it could hide. (A change whose correctness is self-evident, or already pinned by an
@@ -36,5 +37,6 @@ departure. Name in `not_covered` any clause you did not probe.
 **Checked.** Name each changed behavior you mapped to the assertion that would fail if it
 regressed, and the regression that mapping would have caught.
 
-**Findings.** `file:line · behavior unverified OR test proves nothing OR test bloat ·
-consequence`.
+**Findings.** `[issue|info] file:line · behavior unverified OR test proves nothing OR test bloat ·
+consequence`. An `Insists on` defect is `[issue]`; a `Flags` note is `[info]`; the fields go on
+sub-lines per the skill's shape.

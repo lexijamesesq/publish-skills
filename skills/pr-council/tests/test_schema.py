@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
-"""Contract guard for the per-card result schema.
+"""Contract guard for the per-card council result — now a PROSE convention.
 
-The first proof run's verdict crashed the poster: a field came back a string
-where a structured value was expected, and no fenced schema existed anywhere for
-the model to copy — the contract lived only as an inline prose key list. The
-original fix fenced a copy of the AGGREGATE schema in agents/margot.md for the
-model to emulate.
+History: the per-card result was once a fenced JSON object (reviewer/completion/
+checked/not_covered/findings) that a downstream `claude -p --json-schema` "finalize"
+call transcribed into dotty-private's aggregate verdict.schema.json. The Margot
+re-architecture removes finalize and moves the typing to the decision seam (Jev,
+or a Haiku-with-schema bridge); no `--agent` output is transcribed. So
+the council reviewer now returns a **stated prose convention** — an [issue]/[info]
+disposition tag with severity + confidence as parallel fields — that the
+deterministic driver and the decision seam parse leniently, not a constrained-typed
+JSON object.
 
-That copy is gone as of 0.1.23, and this test no longer requires it, because the
-failure it guarded against no longer exists: Margot now reviews under `--agent`
-and a downstream no-tool `claude -p --json-schema` "finalize" call transcribes
-her review into the verdict. `--json-schema` HARD-enforces the shape via
-constrained decoding against dotty-private's verdict.schema.json — the model
-cannot return a string where a structured value belongs, so no copy-for-the-model
-is needed and none is carried (see the slim in agents/margot.md). The aggregate
-schema is now single-homed in dotty-private (verdict.schema.json + the poster's
-render tests); AGGREGATE_KEYS below is retained as the documented cross-repo
-reference, no longer asserted against a margot.md block on this side.
+This test pins that convention's copyable shape in skills/pr-council/SKILL.md:
+exactly one fenced shape block carrying the emitted lines, and NO per-card JSON
+object left lingering. A future edit that paraphrases the shape into prose (losing
+the copyable block) breaks this test on purpose — the copyable shape was the value
+the JSON block used to carry.
 
-What this still pins:
-
-  * the PER-CARD result, in skills/pr-council/SKILL.md — what one reviewer
-    returns to Margot. Unchanged by Plan B: pr-reviewers still emit this shape.
+The AGGREGATE verdict schema is single-homed in dotty-private (verdict.schema.json
++ the poster's render tests); AGGREGATE_KEYS below is retained only as a documented
+cross-repo reference. NOTE: finalize + every verdict.schema.json copy are DELETED at
+the finalize-removal slice of the re-architecture — this aggregate reference retires
+with them.
 
 Usage: python3 skills/pr-council/tests/test_schema.py
 """
-import json
+
 import pathlib
 import re
 import sys
@@ -33,58 +33,81 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[3]
 SKILL = ROOT / "skills" / "pr-council" / "SKILL.md"
 
-# Documented cross-repo reference only (no longer asserted on this side): the
-# aggregate verdict schema is single-homed in dotty-private's verdict.schema.json,
-# which finalize's constrained decoding enforces and the poster's render tests pin.
+# Documented cross-repo reference only (retires at S4 with finalize).
 AGGREGATE_KEYS = [
-    "outcome", "risk", "risk_reason", "rationale", "authority", "clarification",
-    "summoned", "not_summoned", "checked", "findings", "dismissals", "ticket",
+    "outcome",
+    "risk",
+    "risk_reason",
+    "rationale",
+    "authority",
+    "clarification",
+    "summoned",
+    "not_summoned",
+    "checked",
+    "findings",
+    "dismissals",
+    "ticket",
 ]
-PER_CARD_KEYS = ["reviewer", "completion", "checked", "not_covered", "findings"]
-PER_CARD_FINDING_KEYS = [
-    "reviewer", "clause", "severity", "confidence", "location", "sentence",
-    "consequence", "action",
+
+# The emitted prose-convention markers the copyable shape block must carry.
+SHAPE_MARKERS = [
+    "card:",
+    "completion:",
+    "Checked:",
+    "Not covered:",
+    "Findings:",
+    "[issue]",
+    "[info]",
+    "severity=",
+    "confidence=",
+    "what:",
+    "consequence:",
+    "action:",
+    "note:",
 ]
-CARD_NAMES = [
-    "house-style", "works-and-proven", "achieves-the-objective",
-    "maintainable-no-slop", "principal-engineer", "safety",
-]
+# JSON string-keys of the RETIRED per-card object — none may linger.
+RETIRED_JSON_KEYS = ['"reviewer"', '"completion"', '"not_covered"']
 
 fail = []
+text = SKILL.read_text()
 
+# Every fenced block as (info-string, body).
+fences = re.findall(r"```([^\n]*)\n(.*?)\n```", text, re.DOTALL)
 
-def fenced_json(path):
-    """Return every ```json block in path, parsed. A block that won't parse is a failure."""
-    blocks = re.findall(r"```json\n(.*?)\n```", path.read_text(), re.DOTALL)
-    out = []
-    for i, b in enumerate(blocks):
-        try:
-            out.append(json.loads(b))
-        except json.JSONDecodeError as e:
-            fail.append(f"{path.relative_to(ROOT)}: fenced json block {i} does not parse: {e}")
-    return out
+# 1. No per-card JSON object survives.
+json_blocks = [body for info, body in fences if info.strip() == "json"]
+if json_blocks:
+    fail.append(
+        f"pr-council/SKILL.md: found {len(json_blocks)} fenced ```json block(s); the "
+        "per-card result is a prose convention now — no JSON object should remain"
+    )
+for k in RETIRED_JSON_KEYS:
+    if k in text:
+        fail.append(f"pr-council/SKILL.md: retired per-card JSON key {k} still present")
 
-
-card_blocks = fenced_json(SKILL)
-
-if len(card_blocks) != 1:
-    fail.append(f"pr-council/SKILL.md: expected exactly 1 fenced json schema, found {len(card_blocks)}")
-
-if card_blocks:
-    card = card_blocks[0]
-    if list(card) != PER_CARD_KEYS:
-        fail.append(f"pr-council/SKILL.md: per-card keys are {list(card)}, expected {PER_CARD_KEYS}")
-    # a green card is earnable only through its Checked list
-    if not isinstance(card.get("checked"), list) or not card.get("checked"):
-        fail.append("pr-council/SKILL.md: checked must be a non-empty list of probes")
-    if not isinstance(card.get("not_covered"), list):
-        fail.append("pr-council/SKILL.md: not_covered must be a list")
-    cf = (card.get("findings") or [{}])[0]
-    if list(cf) != PER_CARD_FINDING_KEYS:
-        fail.append(f"pr-council/SKILL.md: finding keys are {list(cf)}, expected {PER_CARD_FINDING_KEYS}")
+# 2. Exactly one copyable shape block (a ```text fence) carries the convention.
+shape_blocks = [
+    body
+    for info, body in fences
+    if info.strip() == "text" and "card:" in body and "Findings:" in body
+]
+if len(shape_blocks) != 1:
+    fail.append(
+        "pr-council/SKILL.md: expected exactly 1 copyable shape block (a ```text fence "
+        f"containing 'card:' and 'Findings:'), found {len(shape_blocks)}"
+    )
+else:
+    block = shape_blocks[0]
+    for marker in SHAPE_MARKERS:
+        if marker not in block:
+            fail.append(
+                f"pr-council/SKILL.md: the shape block is missing the marker {marker!r}"
+            )
 
 for m in fail:
     print("FAIL:", m)
 if fail:
     sys.exit(1)
-print("OK: the per-card fenced schema parses and carries exactly its pinned keys")
+print(
+    "OK: the per-card prose convention is single-homed and carries its copyable shape"
+)

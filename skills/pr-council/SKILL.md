@@ -114,35 +114,49 @@ block of all, and a green card with no Checked block is not a pass.
 
 ## What you return
 
-One JSON object, this shape. Free-text fields below are described, not exemplified; the enumerated
-values are literal.
+You return **prose in this convention** — not a JSON object. Margot and the deterministic driver
+read it leniently, so state it exactly in this shape: one field per line, labels at the line start,
+so a human and a parser read it the same way. This is a witness statement, not an essay. The shape,
+copyable:
 
-```json
-{
-  "reviewer": "the card name you ran",
-  "completion": "completed | incomplete: <the exact evidence you could not obtain> | skipped: <the file fact that skipped it>",
-  "checked": [
-    "each probe you ran, and the failure it would have detected if present"
-  ],
-  "not_covered": [
-    "each clause you did not probe, and why"
-  ],
-  "findings": [
-    {
-      "reviewer": "the card name you ran",
-      "clause": "mandatory | advisory",
-      "severity": "BLOCKING | MAJOR | MINOR",
-      "confidence": "HIGH | MEDIUM | LOW",
-      "location": "<file>:<line>, or the check name",
-      "sentence": "one sentence: what is wrong and why it matters",
-      "consequence": "what breaks, or what an attacker or a rerun gets",
-      "action": "the required action (mandatory) or the note (advisory)"
-    }
-  ]
-}
+```text
+card: <the card name you ran>
+completion: completed | incomplete: <the exact evidence you could not obtain> | skipped: <the file fact that skipped it>
+
+Checked:
+- <the probe> — would have caught <the failure if present>
+
+Not covered:
+- <an `insists on` clause you did not probe> — <why it did not apply, or what you could not reach>
+
+Findings:
+- [issue] <file:line, the check name, or the Done-When line> · severity=<BLOCKING|MAJOR|MINOR> · confidence=<HIGH|MEDIUM|LOW>
+    what: <one sentence — what is wrong and why it matters>
+    consequence: <what breaks, or what an attacker or a rerun gets>
+    action: <the required fix>
+- [info] <location> · severity=<BLOCKING|MAJOR|MINOR> · confidence=<HIGH|MEDIUM|LOW>
+    what: <one sentence>
+    consequence: <what the note is about>
+    note: <the advisory note>
 ```
 
-**Empty findings without a `completed` status is incomplete, never clean.** If you skipped, give the
-actual file fact that skipped you and the files you looked at — never a generic reason. Margot
-dedups across the six, re-reads every mandatory finding against the cited code, and decides the
-verdict.
+**The tag is the clause.** `[issue]` — an `insists on` finding: a reproducible, mandatory defect,
+blocking. `[info]` — a `flags` finding: advisory, never blocking. `severity` and `confidence` are
+parallel facts, never folded into the tag — Margot's outcome rules read the tag, the severity, and
+the confidence independently. `confidence` is an evidence category, not a probability: **HIGH** the
+evidence establishes the defect, **MEDIUM** a material assumption remains open, **LOW** plausible but
+undecided.
+
+**Checked** carries one bullet per probe — at most one per `insists on` clause, which is your
+budget — each naming the failure it would have detected. A card that finds nothing is green
+**because of** this block, never a bare tick; a green card owes the fullest Checked block of all.
+
+**A green card carries no `[issue]` or `[info]`.** A `completion: completed` card with an empty
+Findings list and a full Checked block **is** the clear result — there is no separate "clear" line
+to write. Empty findings without a `completed` status is `incomplete`, never clean. If you skipped,
+give the actual file fact that skipped you and the files you looked at, never a generic reason.
+
+**Size cap.** At most the **five** most consequential findings for your lens — go deep on the real
+ones, never pad to a count. One sentence in `what`; `consequence`/`action`/`note` carry the rest and
+are never repeated in it. Margot dedups across the six, re-reads every `[issue]` against the cited
+code, and decides the verdict.

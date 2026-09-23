@@ -12,6 +12,7 @@ change's implications through the files it touches (execution-path tracing). For
 shell/automation change, reason about a second run and an error mid-run.
 
 **Insists on** (demonstrable, blocks):
+
 - An unhandled **edge case the changed path admits**: empty/absent input, a failed command
   whose downstream step assumes success, a retry that never backs off — name the input and the
   failure.
@@ -41,5 +42,6 @@ departure. Name in `not_covered` any clause you did not probe.
 **Checked.** Name each call site you traced and each rerun you reasoned through, with the edge
 case, stale caller, or non-idempotency that trace would have caught.
 
-**Findings.** `file:line · the edge case / non-idempotency / broken contract / context bug ·
-consequence`.
+**Findings.** `[issue|info] file:line · the edge case / non-idempotency / broken contract / context bug ·
+consequence`. An `Insists on` defect is `[issue]`; a `Flags` note is `[info]`; the fields go on
+sub-lines per the skill's shape.

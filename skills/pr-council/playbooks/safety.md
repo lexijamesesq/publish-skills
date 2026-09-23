@@ -11,6 +11,7 @@ new dependency against the repo's own manifests/lockfile (unresolvable → unver
 a defect). Read-only, at the head sha; never execute or install.
 
 **Insists on** (demonstrable, blocks):
+
 - A third-party **GitHub Action pinned to a mutable tag** (`@v4`, `@main`) instead of a full
   commit SHA — the tj-actions/changed-files attack shape (a tag moved onto a malicious commit).
 - **Untrusted PR input** (title, branch, body) interpolated directly into a `run:` step
@@ -47,5 +48,6 @@ the clauses whose surfaces this diff never reaches.
 probed, with the attack shape that probe would have caught — a moved action tag, an injected
 `run:` step, a bypassable gate.
 
-**Findings.** `file:line · the sensitive-surface defect · consequence (what an attacker or a
-rerun gets)`.
+**Findings.** `[issue|info] file:line · the sensitive-surface defect · consequence (what an attacker or a
+rerun gets)`. An `Insists on` defect is `[issue]`; a `Flags` note is `[info]`; the fields go on
+sub-lines per the skill's shape.
