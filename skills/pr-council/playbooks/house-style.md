@@ -12,6 +12,7 @@ source-path resolution, `shellcheck` for shell). For idiom, read 2–3 sibling f
 the naming, error style, and structure already there are the standard.
 
 **Insists on** (demonstrable, blocks):
+
 - A `house-code` / `house-cited-paths` / `house-scaffold` / `shellcheck` finding on a changed line that
   reproduces on the PR head — the check output is the receipt (a forbidden pattern, a broken
   citation, a missing sample marker, a shell quoting bug).
@@ -33,5 +34,6 @@ departure. Name in `not_covered` any clause you did not probe.
 **Checked.** Name each check whose output you read and each sibling file you compared against,
 with the defect that comparison would have caught — a bare "read the diff" is not a probe.
 
-**Findings.** `file:line · the convention broken (with the check name or the sibling line) ·
-consequence`.
+**Findings.** `[issue|info] file:line · the convention broken (with the check name or the sibling line) ·
+consequence`. An `Insists on` defect is `[issue]`; a `Flags` note is `[info]`; the fields go on
+sub-lines per the skill's shape.

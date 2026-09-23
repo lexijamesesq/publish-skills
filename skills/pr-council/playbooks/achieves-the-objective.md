@@ -15,6 +15,7 @@ resolvable ticket URL, record `ticket/map coverage unavailable — no ticket` an
 description↔diff alignment — a missing ticket is a disclosed gap, never a pass.
 
 **Insists on** (demonstrable, blocks):
+
 - The diff produces an artifact but a `Done When` condition is not actually met by it — name
   the Done-When line and what the diff leaves unsatisfied (something was produced, the outcome
   didn't move).
@@ -42,5 +43,6 @@ did not probe.
 **Checked.** Name each `Done When` line you held the diff against and each claim in the
 description you matched to a hunk, with the mismatch that comparison would have caught.
 
-**Findings.** `Done-When line / stated intent · what the diff leaves unmet or unmatched ·
-consequence`.
+**Findings.** `[issue|info] Done-When line / stated intent · what the diff leaves unmet or unmatched ·
+consequence`. An `Insists on` defect is `[issue]`; a `Flags` note is `[info]`; the fields go on
+sub-lines per the skill's shape.

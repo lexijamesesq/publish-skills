@@ -15,6 +15,7 @@ Never search a home path (`~` or anything under it) or a mounted volume — outs
 gap, not evidence.
 
 **Insists on** (demonstrable, blocks) — the concrete AI-slop tells, each file:line-able:
+
 - A **nonexistent API or package**, provable from the repo: a call to a method/config option
   absent from the vendored code / type stubs / declared version, or a new dependency whose name
   is not the intended library per the repo's manifests/lockfile (the slopsquatting shape). HIGH
@@ -48,5 +49,6 @@ departure. Name in `not_covered` any clause you did not probe.
 **Checked.** Name each grep of the working-directory checkout you ran before judging something
 novel, and the duplicated helper or reimplemented pattern it would have caught.
 
-**Findings.** `file:line · the named slop signal (+ the second location for a duplication) ·
-consequence`.
+**Findings.** `[issue|info] file:line · the named slop signal (+ the second location for a duplication) ·
+consequence`. An `Insists on` defect is `[issue]`; a `Flags` note is `[info]`; the fields go on
+sub-lines per the skill's shape.
