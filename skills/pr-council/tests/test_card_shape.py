@@ -4,17 +4,19 @@
 Two receipts drive this. First, a reviewer that found nothing returned a bare
 green tick with no record of what it examined — the unearnable green. Every card
 must therefore carry a `Checked.` section telling the reviewer what its block has
-to name. Second, card self-selection is retired: summoning is Margot's judgment
-now (`agents/margot.md`), recorded as `not summoned: <fact>`, so a card no longer
-carries a self-selection heading and `Stopping rule.` carries the probe budget.
+to name. Second, card self-selection is retired: summoning is the driver's
+Jev-decided routing now (which cards a change needs is scored per lens, recorded
+in the route output), so a card no longer carries a self-selection heading and
+`Stopping rule.` carries the probe budget.
 
 This test pins the exact set of section headings a card may carry — presence of
 every required one, and *nothing outside the allowed set*, so a retired heading
 cannot creep back in under any name.
 
-A card's tier is not asserted here on purpose: the tier table lives in
-agents/margot.md as the single source, and a `Tier:` line on a card would be a
-second one. This test fails a card that reintroduces it.
+A card's tier is not asserted here on purpose: the card's model/tier is the
+driver's council dispatch (it spawns each reviewer at the tier the routing
+names), not the card's to declare — a `Tier:` line on a card would be a second
+source. This test fails a card that reintroduces it.
 
 Usage: python3 skills/pr-council/tests/test_card_shape.py
 """
@@ -90,11 +92,11 @@ for p in CARDS:
             fail.append(
                 f"{rel}: carries a heading not in the allowed set: {m.group(1)!r}"
             )
-    # the tier table in agents/margot.md is the single source
+    # the card's model/tier is the driver's council dispatch, not the card's
     for line in text.splitlines():
         if line.startswith("Tier:"):
             fail.append(
-                f"{rel}: carries a 'Tier:' line — the tier table in agents/margot.md is the source"
+                f"{rel}: carries a 'Tier:' line — the driver's council dispatch is the tier source"
             )
     # a Checked section that doesn't ask for the detection target is not a probe rule
     checked = (
