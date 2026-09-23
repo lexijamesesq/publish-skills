@@ -157,7 +157,7 @@ fields (`finding`, `established`, `dismissed`), which land in the run, never in 
 outcome: APPROVED | CHANGES_REQUESTED | CLARIFICATION_REQUESTED | ERROR
 band: LOW | MEDIUM | HIGH
 band_reason: <for the run — why this band, and why an override holds if you moved it; technical is fine>
-risk: <ONE plain sentence, or less: in lay terms, what could go wrong for the project if this merges as-is — the consequence. No code, no file:line. Distinct from `summary` (this is the "why it matters"); never a gate phrase.>
+risk: <a SHORT classification of the KIND of risk — a few words, NOT a sentence, e.g. "irreversible data loss", "remote code execution", "widened access", "unproven behavior", "config/rollback risk". It labels the risk in plain terms; the `summary` explains it. Do not repeat the summary. No code, no file:line, no gate phrase.>
 summary: <2–3 plain sentences: Margot's take for a non-engineer — what the change does, what stands in the way of approving it, and what would resolve it. No code, no file:line, no smuggled references.>
 finding: <for the run — the one finding that set the outcome, in its card's words, cited at file:line; or "none" on a clean APPROVED>
 clarification: <CLARIFICATION_REQUESTED only — the one plain-language question the author answers yes/no without opening the diff, and who acts on each answer; else none>
