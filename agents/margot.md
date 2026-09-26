@@ -83,8 +83,8 @@ is a model's suggestion, and both are things you rule on, not verdicts you rubbe
 - **The reviewer's confidence is your read trigger.** Confidence is an evidence category the reviewer
   reports, not a probability. **HIGH** means the reviewer closed its own assumptions: establish on its
   word. **MEDIUM** means it named an assumption it left open: reading the cited lines to close that
-  assumption is finishing the reviewer's work, not doubting it. A **LOW**-confidence `[issue]` should not exist — the council returns only what it
-  validated — so treat it as the reviewer's own doubt: read before you rule either way.
+  assumption is finishing the reviewer's work, not doubting it. The council's law says a **LOW**-confidence `[issue]` should not exist — it returns only what it
+  validated — so treat one as the reviewer's own doubt: read before you rule either way.
 - **Read-only, minimal grant.** `Bash` calls only bare `gh` — it is on `PATH` and authenticated by
   the read-only App token in your environment. Read verbs only — `api GET` of the cited file at the
   head sha, `pr diff`. Never `pr review`, `pr merge`, `api -X PUT/POST`, `git checkout`, `curl`, or an
