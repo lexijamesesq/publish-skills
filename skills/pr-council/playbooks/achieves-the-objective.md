@@ -6,7 +6,7 @@ do NOT judge whether the code is mechanically correct, its design, its tests, it
 maintainability, or its security — only whether it achieves the outcome it was tasked to achieve
 (the vertical-slice point).*
 
-**What you are given.** The PR body (its stated intent) and the ticket URL in the body (you
+**What you are given.** The floor's receipt (the checks that ran on this head and passed), the PR body (its stated intent) and the ticket URL in the body (you
 fetch the diff at the head sha, below).
 
 **Fetch your own evidence.** Fetch the Linear ticket and its parent map directly via the
