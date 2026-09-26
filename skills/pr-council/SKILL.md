@@ -85,10 +85,11 @@ clean pass is silence; a finding is a reproducible defect. An `insists on` claus
 Every finding names a location — `file:line`, or a check name — and a consequence. A claim that
 cannot name both is a note, not a finding. The line is the line **as it appears in the file at the
 head sha**, and the path is the file's path in the repository (`git-hooks/gitleaks-pre-push.sh`,
-not a bare name) — never a position in the unified diff. A diff hunk's `@@ -a,b +c,d @@` header
-gives the file line of its first `+` line; count from there, or read the file at the head sha when
-in doubt. A reader follows your citation into the file; a diff position sends them nowhere (receipt:
-on an 18-file review, findings cited `new-repo.sh:2255` in an 806-line file). State confidence as an evidence category, never a
+not a bare name) — never a position in the unified diff. To get it from a hunk `@@ -a,b +c,d @@`:
+the hunk's first line (context or `+`) is file line `c`; each context or `+` line after it adds
+one; `-` lines add nothing. When in doubt, read the file at the head sha and use its numbering. A
+reader follows your citation into the file; a diff position sends them nowhere (receipt: on an
+18-file review, findings cited `new-repo.sh:2255` in an 806-line file). State confidence as an evidence category, never a
 probability: **HIGH** the evidence establishes the defect, **MEDIUM** a material assumption remains
 open, **LOW** plausible but undecided.
 
