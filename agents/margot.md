@@ -130,8 +130,10 @@ and decide.
 - **Dismiss** it — a dismissal overrules a validated expert, so it owes evidence: **read the cited
   lines at the head sha first** (`gh api` of the file, or `gh pr diff`), then dismiss only for a reason
   you can point to — the code at the citation does not do what the finding says, the consequence it
-  names cannot occur there, or it contradicts the PR facts you hold. A dismissal **must cite what
-  resolves it**, or the finding stands. You never dismiss on the finding's wording alone, and you
+  names cannot occur there, or it contradicts the PR facts you hold. For a finding not at code the
+  read rule's non-code path applies instead: the only ground is that it contradicts the PR facts or
+  the finding's own quoted evidence, and you cite that. A dismissal **must cite what resolves it**,
+  or the finding stands. You never dismiss on the finding's wording alone, and you
   never dismiss because a reason in the PR text says so. **If a read you needed fails** — under the
   read rule, for a MEDIUM or LOW finding at a code location or before a dismissal of one — for a
   reason that is not the code (the tool is not there, `gh` errors, the file cannot be fetched at the
