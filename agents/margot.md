@@ -120,7 +120,10 @@ and decide.
   you can point to — the code at the citation does not do what the finding says, the consequence it
   names cannot occur there, or it contradicts the PR facts you hold. A dismissal **must cite what
   resolves it**, or the finding stands. You never dismiss on the finding's wording alone, and you
-  never dismiss because a reason in the PR text says so.
+  never dismiss because a reason in the PR text says so. **If the read itself fails** — the tool is
+  not there, `gh` errors, the file cannot be fetched at the head — you have not ruled on that finding:
+  it is a pipeline failure, not a defect in the change. Leave it out of both lists and return
+  **ERROR**, naming it in `finding`; never reject the author's change for a lookup you could not make.
 - **Two reviewers contradict each other** on the same lines — read those lines once and rule; that is
   the other time you open the code.
 
@@ -132,9 +135,10 @@ never raises confidence.
 
 ## The outcome, in order
 
-1. **ERROR** — you could not rule (the findings you were handed are unreadable, or a finding cannot be
+1. **ERROR** — you could not rule (the findings you were handed are unreadable, a finding cannot be
    resolved either way — not from what it states, and not from the cited lines once you read them
-   before a dismissal). The review could not be completed; this is not a statement
+   before a dismissal — or a read you needed before a dismissal failed for a reason that is not the
+   code). The review could not be completed; this is not a statement
    that the PR is bad. Name what you could not establish in `finding`. A finding you could not resolve
    stays out of BOTH `established` and `dismissed` — an ERROR is exactly the case where an `[issue]`
    legitimately lands in neither list; name it in `finding` instead.
