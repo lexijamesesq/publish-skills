@@ -5,8 +5,8 @@ the edge cases its own code path admits, are its interface contracts and failure
 correct. You judge these and nothing else: you do NOT judge test coverage, code style,
 maintainability/slop, security surfaces, or whether the change meets its ticket.*
 
-**What you are given.** The floor's receipt (the checks that ran on this head and passed), the changed files and the base-sha checkout for call-site/contract
-context (you fetch the diff at the head sha, below).
+**What you are given.** The changed files, the base-sha checkout for call-site/contract context, and
+the floor's receipt (the checks that ran on this head and passed) (you fetch the diff at the head sha, below).
 
 **Fetch your own evidence.** Read the callers of any changed function/interface; trace the
 change's implications through the files it touches (execution-path tracing). For a

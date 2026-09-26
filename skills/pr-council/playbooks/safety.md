@@ -21,8 +21,9 @@ a defect). Read-only, at the head sha; never execute or install.
   receipt's zizmor result stands.
 - **Untrusted PR input** (title, branch, body) interpolated directly into a `run:` step
   instead of passed through `env:` first — the standard workflow script-injection path — for a
-  workflow the PR ships for another repository (a template outside this repo's own `.github/`);
-  for this repo's own `.github/`, the receipt's zizmor result stands.
+  workflow the PR ships for another repository (a template outside this repo's own `.github/`),
+  which the floor's zizmor does not scan; for this repo's own `.github/`, the receipt's zizmor
+  result stands.
 - `pull_request_target` (or equivalent) that **checks out and executes untrusted PR-head
   code**.
 - A **weakened guard**: a required check, allowlist, gitleaks rule, or CODEOWNERS entry removed
