@@ -133,7 +133,8 @@ never raises confidence.
 ## The outcome, in order
 
 1. **ERROR** — you could not rule (the findings you were handed are unreadable, or a finding cannot be
-   resolved either way from what it states). The review could not be completed; this is not a statement
+   resolved either way — not from what it states, and not from the cited lines once you read them
+   before a dismissal). The review could not be completed; this is not a statement
    that the PR is bad. Name what you could not establish in `finding`. A finding you could not resolve
    stays out of BOTH `established` and `dismissed` — an ERROR is exactly the case where an `[issue]`
    legitimately lands in neither list; name it in `finding` instead.
