@@ -78,11 +78,15 @@ Then:
    changed the code they cite. Then it is a new finding about the delta, not the old entry.
 3. **Review the delta** for new defects in your focus, including a fix that broke unchanged code it
    touches.
-4. **A new finding about code the delta did not change is late.** Tag it `late=<reason>`, where the
-   reason is `delta-reach` (the delta changed what reaches this code) or `missed` (it was there
-   before and round one did not raise it), followed by one clause of explanation. From round two,
-   only a BLOCKING late finding can block (a `safety` late finding still blocks at MAJOR); anything
-   smaller is reported as advisory.
+4. **A new finding about code the delta did not change carries a reason.** Tag it
+   `late=<reason>` followed by one clause of explanation:
+   - `delta-reach` — the delta broke this unchanged code (a caller, a consumer, a contract it
+     relies on). This is a regression of this round's change, not a late finding: it blocks at its
+     honest severity. Name the delta change that causes it.
+   - `missed` — it was there before and an earlier round did not raise it. This is late: from
+     round two only a BLOCKING late finding blocks (a `safety` one still blocks at MAJOR); anything
+     smaller is reported as advisory.
+   Untagged, a finding about unchanged code is treated as `missed`.
 
 From round two, a MINOR `[issue]` is also reported as advisory. The pipeline applies both rules;
 you return your findings with their honest severity.
