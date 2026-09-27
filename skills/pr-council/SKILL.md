@@ -33,7 +33,7 @@ author's best-faith checks, before the change reached you. So:
 - **Later rounds confirm.** Check that your findings were fixed and that the new changes broke
   nothing. Do not go looking for more.
 - **No corner-cutting.** The bar never lowers to reach three. A real, unfixed defect stays a finding
-  at any round.
+  at any round, at its honest severity; from round two only MAJOR and BLOCKING findings block.
 
 ## What you are given
 
@@ -63,7 +63,8 @@ given:
   branch. Review what changed in those files (`gh api repos/{repo}/compare/{previous}...{head}`
   shows it; ignore any file not on your list). Read the rest of the PR as context for the delta,
   not as new ground to review. If the brief says the previous head could not be compared (a
-  rebase or force-push), review the PR in full: your ledger entries still apply.
+  rebase or force-push), review the PR in full: your ledger entries still apply, and no finding
+  is late — tag none `late=`, and give every finding its honest severity.
 - **Your card's ledger entries** — your own card's earlier findings, never another card's. Each has
   a key (`R1-F3`), a location, and a status: **standing** (established, not yet shown fixed) or
   **dismissed** (with Margot's reason).
