@@ -58,9 +58,12 @@ that you resolved it yourself. If you cannot, that is `incomplete`, never a pass
 When your brief names a **round number above one**, Margot has reviewed this PR before. You are also
 given:
 
-- **The previously reviewed head sha.** Your review scope is the **delta** — what changed between
-  that head and this one: `gh api repos/{repo}/compare/{previous}...{head}`. Read the rest of the
-  PR as context for the delta, not as new ground to review.
+- **The previously reviewed head sha, and your delta** — the files of this PR that changed since
+  that review. The pipeline computes the list; it already leaves out work merged in from the base
+  branch. Review what changed in those files (`gh api repos/{repo}/compare/{previous}...{head}`
+  shows it; ignore any file not on your list). Read the rest of the PR as context for the delta,
+  not as new ground to review. If the brief says the previous head could not be compared (a
+  rebase or force-push), review the PR in full: your ledger entries still apply.
 - **Your card's ledger entries** — your own card's earlier findings, never another card's. Each has
   a key (`R1-F3`), a location, and a status: **standing** (established, not yet shown fixed) or
   **dismissed** (with Margot's reason).
@@ -77,7 +80,8 @@ Then:
 4. **A new finding about code the delta did not change is late.** Tag it `late=<reason>`, where the
    reason is `delta-reach` (the delta changed what reaches this code) or `missed` (it was there
    before and round one did not raise it), followed by one clause of explanation. From round two,
-   only a BLOCKING late finding can block; anything smaller is reported as advisory.
+   only a BLOCKING late finding can block (a `safety` late finding still blocks at MAJOR); anything
+   smaller is reported as advisory.
 
 From round two, a MINOR `[issue]` is also reported as advisory. The pipeline applies both rules;
 you return your findings with their honest severity.

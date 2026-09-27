@@ -80,7 +80,8 @@ finding and its fate, so later rounds confirm what was fixed and rule on what th
   driver has already carried those dismissals forward; they are listed for context, not for a
   second ruling.
 - **A late finding** (`late=` on its line) is about code a previous round already saw. Only BLOCKING
-  late findings reach you as mandatory; the driver reports smaller ones as advisory. Rule on its
+  late findings (MAJOR and above from the `safety` card) reach you as mandatory; the driver
+  reports smaller ones as advisory. Rule on its
   merits, and weigh the reason it gives.
 - **From round two, MINOR findings are advisory.** The driver applies this; only MAJOR and BLOCKING
   findings reach you as mandatory.

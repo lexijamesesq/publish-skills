@@ -64,6 +64,11 @@ SHAPE_MARKERS = [
     "consequence:",
     "action:",
     "note:",
+    # Round two: the margot driver's ledger parse reads these three ("Convergence
+    # ledger" in driver.py); dropping one from the shape breaks convergence.
+    "Resolved:",
+    "ledger=",
+    "late=",
 ]
 # JSON string-keys of the RETIRED per-card object — none may linger.
 RETIRED_JSON_KEYS = ['"reviewer"', '"completion"', '"not_covered"']
