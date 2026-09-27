@@ -80,8 +80,10 @@ finding and its fate, so later rounds confirm what was fixed and rule on what th
   driver has already carried those dismissals forward; they are listed for context, not for a
   second ruling.
 - **A finding about unchanged code** carries a reason (`late=` on its line). `late=delta-reach`
-  means the new changes broke that code: a regression, which reaches you at its severity — rule on
-  whether the delta really causes it, and dismiss it as late if it does not. `late=missed` (or no
+  means the new changes broke that code: a regression, which reaches you at its severity. If the
+  delta does not cause it, rule on it as a late finding instead: a BLOCKING one (MAJOR from the
+  `safety` card) you still establish if the defect is real; a smaller one you dismiss as advisory
+  ("late, not caused by the delta"). Never dismiss a real BLOCKING defect for its tag. `late=missed` (or no
   reason) is a late finding: only BLOCKING ones (MAJOR and above from the `safety` card) reach you
   as mandatory; the driver reports smaller ones as advisory.
 - **From round two, MINOR findings are advisory.** The driver applies this; only MAJOR and BLOCKING
