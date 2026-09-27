@@ -72,10 +72,10 @@ given:
 Then:
 
 1. **Close every standing entry.** Either list it under `Resolved:` with the lines that fix it, or
-   return it again as an `[issue]` carrying `ledger=<key>`, if it is still there. An entry you
-   neither resolve nor re-raise goes back to Margot as unconfirmed.
+   return it again as an `[issue]` carrying `ledger=<key>`, if it is still there. Margot confirms
+   each one.
 2. **Leave dismissed entries alone.** Margot ruled on them; they stay dismissed unless the delta
-   changed the code they cite. Then it is a new finding about the delta, not the old entry.
+   changed the code they cite.
 3. **Review the delta** for new defects in your focus, including a fix that broke unchanged code it
    touches.
 4. **A new finding about code the delta did not change carries a reason.** Tag it
@@ -86,7 +86,7 @@ Then:
    - `missed` — it was there before and an earlier round did not raise it. This is late: from
      round two only a BLOCKING late finding blocks (a `safety` one still blocks at MAJOR); anything
      smaller is reported as advisory.
-   Untagged, a finding about unchanged code is treated as `missed`.
+   Margot rules on every tag.
 
 From round two, a MINOR `[issue]` is also reported as advisory. The pipeline applies both rules;
 you return your findings with their honest severity.
