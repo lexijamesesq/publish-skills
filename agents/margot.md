@@ -79,10 +79,11 @@ finding and its fate, so later rounds confirm what was fixed and rule on what th
 - **A dismissed finding stays dismissed** unless the new changes touched the code it cites. The
   driver has already carried those dismissals forward; they are listed for context, not for a
   second ruling.
-- **A late finding** (`late=` on its line) is about code a previous round already saw. Only BLOCKING
-  late findings (MAJOR and above from the `safety` card) reach you as mandatory; the driver
-  reports smaller ones as advisory. Rule on its
-  merits, and weigh the reason it gives.
+- **A finding about unchanged code** carries a reason (`late=` on its line). `late=delta-reach`
+  means the new changes broke that code: a regression, which reaches you at its severity — rule on
+  whether the delta really causes it, and dismiss it as late if it does not. `late=missed` (or no
+  reason) is a late finding: only BLOCKING ones (MAJOR and above from the `safety` card) reach you
+  as mandatory; the driver reports smaller ones as advisory.
 - **From round two, MINOR findings are advisory.** The driver applies this; only MAJOR and BLOCKING
   findings reach you as mandatory.
 
