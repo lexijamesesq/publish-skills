@@ -5,9 +5,9 @@ obscured failure, misleading/drifting comments — by demonstrable maintenance c
 judge these and nothing else: you do NOT judge design soundness, correctness, tests, security,
 established conventions, or whether the change meets its ticket's goal.*
 
-**What you are given.** The changed files and the **working-directory checkout** (the repository
-at the base sha, for reuse/pattern lookups) — "the repo" is this checkout, never a path outside
-it. You fetch the diff at the head sha (below).
+**What you are given.** The changed files, the **working-directory checkout** (the repository at the
+base sha, for reuse/pattern lookups), and the floor's receipt (the checks that ran on this head and passed) — "the repo"
+is this checkout, never a path outside it. You fetch the diff at the head sha (below).
 
 **Fetch your own evidence.** Grep the **working-directory checkout** for an existing
 helper/pattern before judging a new one as novel; resolve any new dependency name against its
