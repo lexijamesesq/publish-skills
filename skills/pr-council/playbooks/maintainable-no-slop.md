@@ -5,15 +5,15 @@ obscured failure, misleading/drifting comments — by demonstrable maintenance c
 judge these and nothing else: you do NOT judge design soundness, correctness, tests, security,
 established conventions, or whether the change meets its ticket's goal.*
 
-**What you are given.** The changed files, the **working-directory checkout** (the repository at the
+**What you are given.** The changed files, the **repository through the `evidence` tools** (at the
 base sha, for reuse/pattern lookups), and the floor's receipt (the checks that ran on this head and passed) — "the repo"
-is this checkout, never a path outside it. You fetch the diff at the head sha (below).
+is the repository those tools serve, never a path outside it. You fetch the diff at the head sha (below).
 
-**Fetch your own evidence.** Grep the **working-directory checkout** for an existing
-helper/pattern before judging a new one as novel; resolve any new dependency name against its
+**Fetch your own evidence.** Search the repository with the `evidence` tools (`list_files`, then
+`search_file`) for an existing helper/pattern before judging a new one as novel; resolve any new dependency name against its
 canonical registry; check whether a cited API/method actually exists in the installed version.
-Never search a home path (`~` or anything under it) or a mounted volume — outside the checkout is a
-gap, not evidence.
+Never search a home path (`~` or anything under it) or a mounted volume — outside the repository the evidence tools serve is
+a gap, not evidence.
 
 **Insists on** (demonstrable, blocks) — the concrete AI-slop tells, each file:line-able:
 
@@ -48,7 +48,7 @@ of the named tells; invent an AI-slop taxonomy beyond these demonstrable signals
 **Stopping rule.** One probe per `insists on` clause, then stop — your skill's budget, no
 departure. Name in `not_covered` any clause you did not probe.
 
-**Checked.** Name each grep of the working-directory checkout you ran before judging something
+**Checked.** Name each search of the repository you ran before judging something
 novel, and the duplicated helper or reimplemented pattern it would have caught.
 
 **Findings.** `[issue|info] file:line · the named slop signal (+ the second location for a duplication) ·
