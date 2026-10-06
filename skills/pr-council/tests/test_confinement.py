@@ -67,8 +67,10 @@ if "`Skill` tool first" not in a:
     )
 
 
-# 1d. each agent's frontmatter `tools:` is its grant under native loading: pin it
-#     to the previous reviewer's tools exactly.
+# 1d. each agent's frontmatter `tools:` is its grant under native loading. Pin the
+#     reviewer to its grant before the evidence-tool confinement (Read, Grep, Glob, Bash
+#     for gh, the Linear reads) plus `Skill`, which an `--agent` session needs to load
+#     pr-council; pin margot to `Bash` for gh. The runtime scopes Bash to gh.
 def grant(path):
     front = path.read_text().split("---")[1]
     block = re.search(r"^tools:(.*?)(?=^\w)", front, re.S | re.M)
