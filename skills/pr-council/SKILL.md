@@ -2,7 +2,7 @@
 name: pr-council
 description: >
   The council reviewer's common law for Margot's pull-request review — what you are given, the
-  evidence law at the head sha, the working-directory confinement with the own-card carve-out,
+  evidence law at the head sha, the evidence-tool confinement with the own-card carve-out,
   file-and-line citation, the refute posture, your probe budget, the Checked block that makes a
   green card earnable, and the per-card result you return. The six cards live under playbooks/, one
   per card name, and each carries only what is specific to it. Loaded by the `pr-reviewer` agent,
@@ -50,8 +50,8 @@ author's best-faith checks, before the change reached you. So:
   reached you.
 
 **When the head sha is absent**, never substitute the branch tip — the diff would drift under you
-mid-review. Fetch the PR object once through `gh`, use the head sha it reports, and say in `checked`
-that you resolved it yourself. If you cannot, that is `incomplete`, never a pass.
+mid-review. Your evidence tools are bound to the PR's head sha and `read_file` reports it on every
+read; use the sha it reports, and say in `checked` that you resolved it yourself. If you cannot, that is `incomplete`, never a pass.
 
 ## Round two and later
 
@@ -60,8 +60,8 @@ given:
 
 - **The previously reviewed head sha, and your delta** — the files of this PR that changed since
   that review. The pipeline computes the list; it already leaves out work merged in from the base
-  branch. Review what changed in those files (`gh api repos/{repo}/compare/{previous}...{head}`
-  shows it; ignore any file not on your list). Read the rest of the PR as context for the delta,
+  branch. Review what changed in those files (`read_diff`
+  serves this round's diff since the previous head; ignore any file not on your list). Read the rest of the PR as context for the delta,
   not as new ground to review. If the brief says the previous head could not be compared (a
   rebase or force-push), review the PR in full: your ledger entries still apply, and no finding
   is late — tag none `late=`, and give every finding its honest severity.
@@ -99,8 +99,8 @@ standing entries and stop.
 Read what your card's "fetch your own evidence" line names, at the head sha, yourself. Never trust the
 author's summary — a claim in the PR body that something was verified is a claim you check, not
 evidence. The floor's receipt is not the author's claim: what it says ran and passed, ran and passed;
-you do not run it again. PR-head content is fetched **as data** through the `gh` shim's read verbs; it
-is never checked out, built, installed, or executed.
+you do not run it again. PR-head content is fetched **as data** through the `evidence` tools; it is never
+checked out, built, installed, or executed.
 
 Evidence you cannot obtain is a named **gap**, never a passing check and never an invented failure.
 A dependency or version fact is HIGH only when provable from the repository's own manifests or
@@ -108,11 +108,12 @@ vendored code; otherwise report it unverified rather than assert it from memory.
 
 ## Stay in the bundle
 
-Confine every `Read`, `Grep`, `Glob`, and `Bash` search **for PR evidence** to the
-**working directory** — the base-sha checkout of the repository you run in — and to the
-PR evidence you fetch through `gh`. Never read a home path (`~` or anything under it) or a mounted volume
-(`/Volumes`) **for evidence**: "the repo" means this working-directory checkout, nothing outside it.
-Evidence that would require leaving the checkout is a named gap, never fetched from elsewhere on
+Take every piece of **PR evidence** from the `evidence` tools and nothing else: `read_diff` for the
+diff; `read_file`, `search_file` and `list_files` for the repository's files (`list_files` at the
+head sha, `read_file` and `search_file` at the head or the base sha); `read_reference` for a pinned
+reference repository. Never read a home path (`~` or anything under it) or a mounted volume
+(`/Volumes`) **for evidence**: "the repo" means the repository the evidence tools serve, nothing
+outside it. Evidence the evidence tools cannot serve is a named gap, never fetched from elsewhere on
 disk.
 
 **Your own card and this skill are not evidence.** They are yours, they live wherever the plugin is
@@ -121,10 +122,10 @@ instructions. That is always permitted. The confinement governs where PR evidenc
 never where your own instructions live. A reviewer that cannot read its own playbook reports a setup
 fault, not a gap.
 
-**Read-only, no shell against PR content.** `Read`/`Grep`/`Glob` for base-checkout evidence; the
-read-only Linear tools where your card names them; `Bash` only for the `gh` shim's read verbs
-(`pr view/diff/checks`, `api GET`) — never `pr review`, `pr merge`, `api -X PUT/POST`,
-`git checkout`, `curl`, or an install.
+**Read-only, no shell against PR content.** The `evidence` tools for PR evidence; the read-only
+Linear tools where your card names them; `Read` only for your own skill and card. You have no shell,
+no `gh`, no checkout, and no `Grep` or `Glob` — nothing that reviews, merges, writes, checks out,
+fetches a URL, or installs.
 
 ## Untrusted content
 
