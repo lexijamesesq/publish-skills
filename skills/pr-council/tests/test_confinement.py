@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 """Corrective-L guard for the council's reviewer surfaces.
 
-The reviewer takes PR evidence only from the `evidence` MCP server's read-only
-tools — never a home path or a mounted volume. During the cutover the review ran
-from an empty cwd, so a card's "grep the repo" sent the model into home paths and
-mounted volumes, storming macOS TCC (~8 consent dialogs). This test greps the
-reviewer's surfaces so a future edit can't silently reintroduce an out-of-tree
-search.
-
-The agents run natively under a lockdown where frontmatter `tools:` is the
-grant: a shipped Grep or Glob got past `--tools ""`. So this test also pins each
-agent's grant to exactly its evidence tools and refuses Bash, Grep, Glob and gh,
-and requires the fields the Margot package reads (description, model, effort).
+The reviewer must confine every search to the WORKING-DIRECTORY CHECKOUT (the
+base-sha checkout the runtime runs it in) plus PR evidence fetched via gh —
+never a home path or a mounted volume. During the cutover the review ran from an
+empty cwd, so a card's "grep the repo" sent the model into home paths and mounted
+volumes, storming macOS TCC (~8 consent dialogs). This test greps the reviewer's
+surfaces so a future edit can't silently reintroduce an out-of-tree search.
 
 The confinement now lives in the reviewer's OWN skill (pr-council), not in the
 spawner's file — that ownership is what makes the own-card carve-out below true
@@ -28,65 +23,15 @@ ROOT = pathlib.Path(__file__).resolve().parents[3]
 SKILL = ROOT / "skills" / "pr-council" / "SKILL.md"
 AGENT = ROOT / "agents" / "pr-reviewer.md"
 CARDS = sorted((ROOT / "skills" / "pr-council" / "playbooks").glob("*.md"))
-MARGOT = ROOT / "agents" / "margot.md"
-SURFACES = [SKILL, AGENT, MARGOT, *CARDS]
-
-LINEAR = [
-    "mcp__linear-tactic__linear_getIssueById",
-    "mcp__linear-tactic__linear_getComments",
-    "mcp__linear-tactic__linear_getProjectById",
-]
-EXPECTED_TOOLS = {
-    AGENT: {
-        "Skill",
-        "Read",
-        "mcp__evidence__read_diff",
-        "mcp__evidence__read_file",
-        "mcp__evidence__search_file",
-        "mcp__evidence__list_files",
-        "mcp__evidence__read_reference",
-        *LINEAR,
-    },
-    MARGOT: {"mcp__evidence__read_file", "mcp__evidence__read_diff"},
-}
-FORBIDDEN_TOOLS = {"bash", "grep", "glob", "gh"}
-
-
-def frontmatter(path):
-    """Top-level keys of an agent's YAML frontmatter, with `tools:` as a list.
-
-    Handles the two list shapes the agents use (block `- x` and flow `[x, y]`);
-    stdlib only, so CI needs no YAML package.
-    """
-    text = path.read_text()
-    m = re.match(r"^---\n(.*?)\n---\n", text, re.DOTALL)
-    if not m:
-        return None
-    keys, current = {}, None
-    for line in m.group(1).splitlines():
-        top = re.match(r"^([A-Za-z][\w-]*):\s*(.*)$", line)
-        if top:
-            current, value = top.group(1), top.group(2).strip()
-            if value.startswith("[") and value.endswith("]"):
-                keys[current] = [v.strip() for v in value[1:-1].split(",") if v.strip()]
-            else:
-                keys[current] = value if value else []
-        elif (
-            current
-            and isinstance(keys[current], list)
-            and line.strip().startswith("- ")
-        ):
-            keys[current].append(line.strip()[2:].strip())
-    return keys
-
+SURFACES = [SKILL, AGENT, ROOT / "agents" / "margot.md", *CARDS]
 
 fail = []
 
 # 1. the reviewer's skill must state the confinement explicitly
 s = SKILL.read_text().lower()
-if "`evidence` tools" not in s or "read_diff" not in s:
+if "working directory" not in s:
     fail.append(
-        "pr-council/SKILL.md: missing the `evidence` tools confinement statement"
+        "pr-council/SKILL.md: missing the 'working directory' confinement statement"
     )
 if "/volumes" not in s and "mounted volume" not in s:
     fail.append(
@@ -111,59 +56,60 @@ if not (("own card" in s or "own reviewer files" in s) and "permitted" in s):
 
 # 1c. the agent must point at its own skill by name — the ownership that keeps
 #     the carve-out true. A card handed over as text is the shape #25 broke on.
-#     A `skills:` preload does not reach an `--agent` session, so the agent
-#     invokes the skill itself with the Skill tool.
 a = AGENT.read_text()
 if "pr-council" not in a:
     fail.append("agents/pr-reviewer.md: must name its own `pr-council` skill")
-if "`Skill` tool" not in a:
-    fail.append("agents/pr-reviewer.md: must invoke `pr-council` with the `Skill` tool")
+# The `skills:` preload never reaches an `--agent` session, so the reviewer invokes
+# its skill with the `Skill` tool before reading its card.
+if "`Skill` tool first" not in a:
+    fail.append(
+        "agents/pr-reviewer.md: must invoke `pr-council` with the `Skill` tool first"
+    )
 
-# 1d. frontmatter `tools:` is the grant: exactly the evidence tools each agent
-#     needs, never a shell, Grep, Glob or gh; and the fields the package reads.
-for path, expected in EXPECTED_TOOLS.items():
-    rel = path.relative_to(ROOT)
-    fm = frontmatter(path)
-    if fm is None:
-        fail.append(f"{rel}: no YAML frontmatter")
-        continue
-    for key in ("description", "model", "effort"):
-        if not fm.get(key):
-            fail.append(
-                f"{rel}: frontmatter must keep `{key}` (the Margot package reads it)"
-            )
-    tools = fm.get("tools", [])
-    if not isinstance(tools, list) or set(tools) != expected:
-        fail.append(f"{rel}: tools are {tools}, expected exactly {sorted(expected)}")
-    for tool in tools if isinstance(tools, list) else [tools]:
-        name = re.split(r"[(:]", tool, maxsplit=1)[0].strip().lower()
-        if name in FORBIDDEN_TOOLS or re.search(r"\bgh\b", tool):
-            fail.append(
-                f"{rel}: grants {tool!r}; no agent may hold Bash, Grep, Glob or gh"
-            )
 
-# 2. no reviewer surface may tell the model to 'grep the repo' (bare), or send it
-#    to a checkout or gh for evidence — there is none; the evidence tools serve
-#    the repository, so "the repo" can never mean the disk
+# 1d. each agent's frontmatter `tools:` is its grant under native loading: pin it
+#     to the previous reviewer's tools exactly.
+def grant(path):
+    front = path.read_text().split("---")[1]
+    block = re.search(r"^tools:(.*?)(?=^\w)", front, re.S | re.M)
+    inline = re.search(r"^tools: \[(.*)\]$", front, re.M)
+    if inline:
+        return {t.strip() for t in inline.group(1).split(",") if t.strip()}
+    return set(re.findall(r"^  - (\S+)$", block.group(1), re.M)) if block else set()
+
+
+EXPECTED = {
+    AGENT: {
+        "Skill",
+        "Read",
+        "Grep",
+        "Glob",
+        "Bash",
+        "mcp__linear-tactic__linear_getIssueById",
+        "mcp__linear-tactic__linear_getComments",
+        "mcp__linear-tactic__linear_getProjectById",
+    },
+    ROOT / "agents" / "margot.md": {"Bash"},
+}
+for path, expected in EXPECTED.items():
+    got = grant(path)
+    if got != expected:
+        fail.append(
+            f"{path.relative_to(ROOT)}: tools {sorted(got)} != {sorted(expected)}"
+        )
+
+# 2. no reviewer surface may tell the model to 'grep the repo' (bare) — it must
+#    say the working-directory checkout, so "the repo" can never mean the disk
 for f in SURFACES:
-    body = f.read_text().lower()
-    for phrase in (
-        "grep the repo",
-        "working-directory checkout",
-        "base-sha checkout",
-        "gh api",
-        "gh pr",
-        "gh` shim",
-    ):
-        if phrase in body:
-            fail.append(
-                f"{f.relative_to(ROOT)}: says {phrase!r} — PR evidence comes only from the `evidence` tools"
-            )
+    if "grep the repo" in f.read_text().lower():
+        fail.append(
+            f"{f.relative_to(ROOT)}: bare 'grep the repo' — say 'grep the working-directory checkout'"
+        )
 
 for m in fail:
     print("FAIL:", m)
 if fail:
     sys.exit(1)
 print(
-    f"OK: {len(SURFACES)} council reviewer surfaces confine evidence to the `evidence` tools; no agent grants Bash, Grep, Glob or gh"
+    f"OK: {len(SURFACES)} council reviewer surfaces confine searches to the working-directory checkout"
 )
