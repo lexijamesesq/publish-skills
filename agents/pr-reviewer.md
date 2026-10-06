@@ -19,6 +19,7 @@ tools:
   - mcp__evidence__search_file
   - mcp__evidence__list_files
   - mcp__evidence__read_reference
+  - mcp__evidence__read_check_run
   - mcp__linear-tactic__linear_getIssueById
   - mcp__linear-tactic__linear_getComments
   - mcp__linear-tactic__linear_getProjectById

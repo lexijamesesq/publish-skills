@@ -45,6 +45,7 @@ EXPECTED_TOOLS = {
         "mcp__evidence__search_file",
         "mcp__evidence__list_files",
         "mcp__evidence__read_reference",
+        "mcp__evidence__read_check_run",
         *LINEAR,
     },
     MARGOT: {"mcp__evidence__read_file", "mcp__evidence__read_diff"},

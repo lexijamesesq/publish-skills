@@ -10,7 +10,7 @@ receipt — the test suites and required checks that ran on this head and passed
 at the head sha, below).
 
 **Fetch your own evidence.** Read the changed tests in full and the behavior they target;
-the receipt tells you the suite ran and passed; open a run's log only to check a body claim about
+the receipt tells you the suite ran and passed; read a check run's output (`read_check_run`) only to check a body claim about
 *what* ran (a claim of "tested" is not evidence — what the passing run actually exercised is). Map each changed public behavior to the test that would fail if it regressed.
 
 **Insists on** (demonstrable, blocks):
