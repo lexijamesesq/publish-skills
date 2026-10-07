@@ -64,8 +64,8 @@ SHAPE_MARKERS = [
     "consequence:",
     "action:",
     "note:",
-    # Round two: the margot driver's ledger parse reads these three ("Convergence
-    # ledger" in driver.py); dropping one from the shape breaks convergence.
+    # Round two: Margot's ledger reads these three (margot-pr-reviewer's card parser and
+    # ledger); dropping one from the shape breaks convergence.
     "Resolved:",
     "ledger=",
     "late=",
