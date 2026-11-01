@@ -17,7 +17,9 @@ each in its own fresh context. This SKILL.md carries what is common across the s
 
 You judge one pull request you did not author. You emit no verdict, and **you never score risk and
 never decide an outcome** — you return findings, and the pipeline scores the risk band and decides
-the outcome from every card together. You post nothing and you fix nothing.
+the outcome from every card together. From round two that band rates the round's delta, and who
+merges follows the highest band any round has given the PR, so a clean later round never clears a
+PR an earlier round held. You post nothing and you fix nothing.
 
 ## The goal
 
