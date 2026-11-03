@@ -36,10 +36,10 @@ RESULT_LINES=()
 # report <PASS|FAIL> <probe-name> <detail...> — records one result line and
 # tallies failures. Never exits — every probe runs regardless of prior FAILs.
 report() {
-    local status="$1" name="$2"
-    shift 2
-    RESULT_LINES+=("$status $name: $*")
-    [[ "$status" == "FAIL" ]] && FAIL_COUNT=$((FAIL_COUNT + 1))
+	local status="$1" name="$2"
+	shift 2
+	RESULT_LINES+=("$status $name: $*")
+	[[ "$status" == "FAIL" ]] && FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
 # resolve_estate_hooks_install <profile_dir> — echoes the installPath of
@@ -48,7 +48,8 @@ report() {
 # needs one real cache to pipe JSON at) and probe 6 (defined further down,
 # which keeps its own inline resolution — this helper exists for probe 1
 # only, to avoid a second divergent implementation).
-PY_RESOLVE_ESTATE_HOOKS_CACHE="$(cat <<'PYEOF'
+PY_RESOLVE_ESTATE_HOOKS_CACHE="$(
+	cat <<'PYEOF'
 import json, os, sys
 path = sys.argv[1]
 try:
@@ -85,14 +86,14 @@ PYEOF
 # where settings "hooks" is the literal {} shape (plugin-served).
 # ---------------------------------------------------------------------------
 probe_hook_tilde_expansion() {
-    local name="hook-tilde-expansion"
-    local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
-    local profile_dirs=() d
+	local name="hook-tilde-expansion"
+	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
+	local profile_dirs=() d
 
-    for d in "$profiles_root"/.claude-*; do
-        [[ -f "$d/settings.json" ]] || continue
-        local shape
-        shape="$(python3 -c '
+	for d in "$profiles_root"/.claude-*; do
+		[[ -f "$d/settings.json" ]] || continue
+		local shape
+		shape="$(python3 -c '
 import json, sys
 try:
     with open(sys.argv[1], "r", encoding="utf-8") as f:
@@ -101,70 +102,70 @@ except Exception:
     print("ERROR"); sys.exit()
 print("EMPTY" if s.get("hooks", object()) == {} else "OTHER")
 ' "$d/settings.json" 2>/dev/null)"
-        [[ "$shape" == "EMPTY" ]] && profile_dirs+=("$d")
-    done
+		[[ "$shape" == "EMPTY" ]] && profile_dirs+=("$d")
+	done
 
-    # Staleness: no plugin-served profile means nothing live to resolve the
-    # hook from — this is itself the failure this probe exists to catch
-    # post-cutover, not a condition to skip past.
-    if [[ "${#profile_dirs[@]}" -eq 0 ]]; then
-        report FAIL "$name" \
-            "no \$HOME/.claude-* profile has settings.json \"hooks\":{} (staleness — no plugin-served profile to resolve the hook from)"
-        return
-    fi
+	# Staleness: no plugin-served profile means nothing live to resolve the
+	# hook from — this is itself the failure this probe exists to catch
+	# post-cutover, not a condition to skip past.
+	if [[ "${#profile_dirs[@]}" -eq 0 ]]; then
+		report FAIL "$name" \
+			"no \$HOME/.claude-* profile has settings.json \"hooks\":{} (staleness — no plugin-served profile to resolve the hook from)"
+		return
+	fi
 
-    local profile_dir="${profile_dirs[0]}"
-    local installed_path="$profile_dir/plugins/installed_plugins.json"
-    if [[ ! -f "$installed_path" ]]; then
-        report FAIL "$name" \
-            "installed_plugins.json missing at $installed_path (staleness)"
-        return
-    fi
+	local profile_dir="${profile_dirs[0]}"
+	local installed_path="$profile_dir/plugins/installed_plugins.json"
+	if [[ ! -f "$installed_path" ]]; then
+		report FAIL "$name" \
+			"installed_plugins.json missing at $installed_path (staleness)"
+		return
+	fi
 
-    local install_path
-    install_path="$(python3 -c "$PY_RESOLVE_ESTATE_HOOKS_CACHE" "$installed_path" 2>/dev/null)"
+	local install_path
+	install_path="$(python3 -c "$PY_RESOLVE_ESTATE_HOOKS_CACHE" "$installed_path" 2>/dev/null)"
 
-    if [[ -z "$install_path" ]]; then
-        report FAIL "$name" \
-            "estate-hooks@core installPath unresolved from $installed_path (staleness — the probed surface moved)"
-        return
-    fi
+	if [[ -z "$install_path" ]]; then
+		report FAIL "$name" \
+			"estate-hooks@core installPath unresolved from $installed_path (staleness — the probed surface moved)"
+		return
+	fi
 
-    local hook="$install_path/hooks/vault-mcp-redirect.sh"
+	local hook="$install_path/hooks/vault-mcp-redirect.sh"
 
-    if [[ ! -x "$hook" ]]; then
-        report FAIL "$name" \
-            "vault-mcp-redirect.sh missing or not executable at $hook (staleness — the probed surface moved)"
-        return
-    fi
+	if [[ ! -x "$hook" ]]; then
+		report FAIL "$name" \
+			"vault-mcp-redirect.sh missing or not executable at $hook (staleness — the probed surface moved)"
+		return
+	fi
 
-    # The probed path need not exist — the hook's realpath fallback returns
-    # the raw target unchanged when realpath can't resolve it.
-    local payload rc_block rc_open
-    payload='{"tool_name":"Read","tool_input":{"file_path":"'"$HOME"'/__smoke_fixture__/x.md"}}'
+	# The probed path need not exist — the hook's realpath fallback returns
+	# the raw target unchanged when realpath can't resolve it.
+	local payload rc_block rc_open
+	payload='{"tool_name":"Read","tool_input":{"file_path":"'"$HOME"'/__smoke_fixture__/x.md"}}'
 
-    # Health, block case: tilde-form VAULT_ROOT, single-quoted so THIS shell
-    # never expands it — the hook must expand it internally (via its own
-    # ${VAULT/#\~/$HOME}) and block (exit 2). If the hook's tilde-expansion
-    # regresses, this exit code silently reverts to 0.
-    # shellcheck disable=SC2088  # intentional — this probe exists to prove
-    # the HOOK expands the tilde; expanding it here would defeat the test.
-    printf '%s' "$payload" | VAULT_ROOT='~/__smoke_fixture__' "$hook" >/dev/null 2>&1
-    rc_block=$?
+	# Health, block case: tilde-form VAULT_ROOT, single-quoted so THIS shell
+	# never expands it — the hook must expand it internally (via its own
+	# ${VAULT/#\~/$HOME}) and block (exit 2). If the hook's tilde-expansion
+	# regresses, this exit code silently reverts to 0.
+	# shellcheck disable=SC2088  # intentional — this probe exists to prove
+	# the HOOK expands the tilde; expanding it here would defeat the test.
+	printf '%s' "$payload" | VAULT_ROOT='~/__smoke_fixture__' "$hook" >/dev/null 2>&1
+	rc_block=$?
 
-    # Inverse control: VAULT_ROOT unset entirely must fail-open (exit 0).
-    # Without this control, a hook that always exits 2 (e.g. broken jq
-    # detection) would look like a PASS above for the wrong reason.
-    printf '%s' "$payload" | env -u VAULT_ROOT "$hook" >/dev/null 2>&1
-    rc_open=$?
+	# Inverse control: VAULT_ROOT unset entirely must fail-open (exit 0).
+	# Without this control, a hook that always exits 2 (e.g. broken jq
+	# detection) would look like a PASS above for the wrong reason.
+	printf '%s' "$payload" | env -u VAULT_ROOT "$hook" >/dev/null 2>&1
+	rc_open=$?
 
-    if [[ "$rc_block" -eq 2 && "$rc_open" -eq 0 ]]; then
-        report PASS "$name" \
-            "resolved via $(basename "$profile_dir")'s estate-hooks cache ($install_path); tilde VAULT_ROOT blocked (exit 2); unset VAULT_ROOT fell open (exit 0)"
-    else
-        report FAIL "$name" \
-            "expected block=2/open=0, got block=$rc_block/open=$rc_open — tilde-expansion regression (2026-06-02 class)"
-    fi
+	if [[ "$rc_block" -eq 2 && "$rc_open" -eq 0 ]]; then
+		report PASS "$name" \
+			"resolved via $(basename "$profile_dir")'s estate-hooks cache ($install_path); tilde VAULT_ROOT blocked (exit 2); unset VAULT_ROOT fell open (exit 0)"
+	else
+		report FAIL "$name" \
+			"expected block=2/open=0, got block=$rc_block/open=$rc_open — tilde-expansion regression (2026-06-02 class)"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -176,27 +177,27 @@ print("EMPTY" if s.get("hooks", object()) == {} else "OTHER")
 # by reading the script.
 # ---------------------------------------------------------------------------
 probe_lint_suite() {
-    local name="lint-suite"
-    local tests_dir="$HOME/Repos/wiki/.claude/skills/lint-knowledge/tests"
-    local runner="$tests_dir/run_tests.py"
+	local name="lint-suite"
+	local tests_dir="$HOME/Repos/wiki/.claude/skills/lint-knowledge/tests"
+	local runner="$tests_dir/run_tests.py"
 
-    # Staleness: the suite this probe runs must still exist at its known path.
-    if [[ ! -f "$runner" ]]; then
-        report FAIL "$name" \
-            "run_tests.py missing at $runner (staleness — the probed surface moved)"
-        return
-    fi
+	# Staleness: the suite this probe runs must still exist at its known path.
+	if [[ ! -f "$runner" ]]; then
+		report FAIL "$name" \
+			"run_tests.py missing at $runner (staleness — the probed surface moved)"
+		return
+	fi
 
-    local output rc tail_text
-    output="$(cd "$tests_dir" && python3 run_tests.py 2>&1)"
-    rc=$?
+	local output rc tail_text
+	output="$(cd "$tests_dir" && python3 run_tests.py 2>&1)"
+	rc=$?
 
-    if [[ "$rc" -eq 0 ]]; then
-        report PASS "$name" "run_tests.py exited 0"
-    else
-        tail_text="$(printf '%s\n' "$output" | tail -n 5 | tr '\n' '|')"
-        report FAIL "$name" "run_tests.py exited $rc — tail: $tail_text"
-    fi
+	if [[ "$rc" -eq 0 ]]; then
+		report PASS "$name" "run_tests.py exited 0"
+	else
+		tail_text="$(printf '%s\n' "$output" | tail -n 5 | tr '\n' '|')"
+		report FAIL "$name" "run_tests.py exited $rc — tail: $tail_text"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -223,7 +224,8 @@ probe_lint_suite() {
 # entry pointing at a path that moved or lost its executable bit, invisible
 # until the hook silently failed to fire.
 # ---------------------------------------------------------------------------
-PY_HOOK_CHECK="$(cat <<'PYEOF'
+PY_HOOK_CHECK="$(
+	cat <<'PYEOF'
 import json, os, sys
 
 DOTTY_PREFIX = os.path.realpath(os.path.expanduser("~/bin/dotty/.claude"))
@@ -305,87 +307,87 @@ PYEOF
 )"
 
 probe_hook_registration_integrity() {
-    local name="hook-registration-integrity"
-    local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
-    local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
+	local name="hook-registration-integrity"
+	local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
+	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
 
-    if [[ ! -f "$plugins_state" ]]; then
-        report FAIL "$name" \
-            "plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
-        return
-    fi
+	if [[ ! -f "$plugins_state" ]]; then
+		report FAIL "$name" \
+			"plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
+		return
+	fi
 
-    local declared_profiles
-    declared_profiles="$(python3 -c '
+	local declared_profiles
+	declared_profiles="$(python3 -c '
 import json, sys
 state = json.load(open(sys.argv[1]))
 print(" ".join(sorted(state.keys())))
 ' "$plugins_state" 2>/dev/null)"
 
-    if [[ -z "$declared_profiles" ]]; then
-        report FAIL "$name" \
-            "0 profiles declared in plugins.json (parse failure or empty state — never a clean pass)"
-        return
-    fi
+	if [[ -z "$declared_profiles" ]]; then
+		report FAIL "$name" \
+			"0 profiles declared in plugins.json (parse failure or empty state — never a clean pass)"
+		return
+	fi
 
-    local strict_paths=() other_paths=() d prof declared_set=" "
-    for prof in $declared_profiles; do
-        declared_set="$declared_set $prof "
-        local p="$profiles_root/.claude-$prof/settings.json"
-        [[ -f "$p" ]] && strict_paths+=("$p")
-    done
+	local strict_paths=() other_paths=() d prof declared_set=" "
+	for prof in $declared_profiles; do
+		declared_set="$declared_set $prof "
+		local p="$profiles_root/.claude-$prof/settings.json"
+		[[ -f "$p" ]] && strict_paths+=("$p")
+	done
 
-    for d in "$profiles_root"/.claude-*; do
-        [[ -f "$d/settings.json" ]] || continue
-        local base_prof="${d##*/.claude-}"
-        [[ "$declared_set" == *" $base_prof "* ]] && continue
-        other_paths+=("$d/settings.json")
-    done
+	for d in "$profiles_root"/.claude-*; do
+		[[ -f "$d/settings.json" ]] || continue
+		local base_prof="${d##*/.claude-}"
+		[[ "$declared_set" == *" $base_prof "* ]] && continue
+		other_paths+=("$d/settings.json")
+	done
 
-    if [[ "${#strict_paths[@]}" -eq 0 ]]; then
-        report FAIL "$name" \
-            "none of plugins.json's declared profiles ($declared_profiles) has a live settings.json (staleness)"
-        return
-    fi
+	if [[ "${#strict_paths[@]}" -eq 0 ]]; then
+		report FAIL "$name" \
+			"none of plugins.json's declared profiles ($declared_profiles) has a live settings.json (staleness)"
+		return
+	fi
 
-    local py_out py_rc
-    # Branched, not a nested "${arr[@]+"${arr[@]}"}" guard — bash 3.2
-    # (macOS's shipped /bin/bash) raises "unbound variable" under `set -u`
-    # when expanding an empty array directly, but the nested-quote guard
-    # idiom itself triggers a separate bash 3.2 parser fault when combined
-    # with this heredoc's surrounding content. strict_paths is always
-    # non-empty here (checked above); only other_paths can legitimately be
-    # empty (no non-declared $HOME/.claude-* directories found).
-    if [[ "${#other_paths[@]}" -eq 0 ]]; then
-        py_out="$(python3 -c "$PY_HOOK_CHECK" "${strict_paths[@]}" -- 2>&1)"
-    else
-        py_out="$(python3 -c "$PY_HOOK_CHECK" "${strict_paths[@]}" -- "${other_paths[@]}" 2>&1)"
-    fi
-    py_rc=$?
+	local py_out py_rc
+	# Branched, not a nested "${arr[@]+"${arr[@]}"}" guard — bash 3.2
+	# (macOS's shipped /bin/bash) raises "unbound variable" under `set -u`
+	# when expanding an empty array directly, but the nested-quote guard
+	# idiom itself triggers a separate bash 3.2 parser fault when combined
+	# with this heredoc's surrounding content. strict_paths is always
+	# non-empty here (checked above); only other_paths can legitimately be
+	# empty (no non-declared $HOME/.claude-* directories found).
+	if [[ "${#other_paths[@]}" -eq 0 ]]; then
+		py_out="$(python3 -c "$PY_HOOK_CHECK" "${strict_paths[@]}" -- 2>&1)"
+	else
+		py_out="$(python3 -c "$PY_HOOK_CHECK" "${strict_paths[@]}" -- "${other_paths[@]}" 2>&1)"
+	fi
+	py_rc=$?
 
-    local detail_parts=() overall_ok=1 line_status label rest
-    while IFS=$'\t' read -r line_status label rest; do
-        [[ -z "$line_status" ]] && continue
-        if [[ "$line_status" == "OK" || "$line_status" == "SKIP" ]]; then
-            detail_parts+=("$label: $rest")
-        else
-            overall_ok=0
-            detail_parts+=("$label: $line_status $rest")
-        fi
-    done <<<"$py_out"
+	local detail_parts=() overall_ok=1 line_status label rest
+	while IFS=$'\t' read -r line_status label rest; do
+		[[ -z "$line_status" ]] && continue
+		if [[ "$line_status" == "OK" || "$line_status" == "SKIP" ]]; then
+			detail_parts+=("$label: $rest")
+		else
+			overall_ok=0
+			detail_parts+=("$label: $line_status $rest")
+		fi
+	done <<<"$py_out"
 
-    # Manual join, not `IFS='; '; "${arr[*]}"` — array-join IFS uses only its
-    # FIRST character as the separator, which would silently drop the space.
-    local joined="" part
-    for part in "${detail_parts[@]}"; do
-        [[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
-    done
+	# Manual join, not `IFS='; '; "${arr[*]}"` — array-join IFS uses only its
+	# FIRST character as the separator, which would silently drop the space.
+	local joined="" part
+	for part in "${detail_parts[@]}"; do
+		[[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
+	done
 
-    if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
-        report PASS "$name" "$joined"
-    else
-        report FAIL "$name" "$joined"
-    fi
+	if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
+		report PASS "$name" "$joined"
+	else
+		report FAIL "$name" "$joined"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -409,25 +411,25 @@ print(" ".join(sorted(state.keys())))
 # fake agent entry, not live state.
 # ---------------------------------------------------------------------------
 probe_core_symlink_integrity() {
-    local name="core-symlink-integrity"
-    local state_file="${SMOKE_CORE_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/core.json}"
+	local name="core-symlink-integrity"
+	local state_file="${SMOKE_CORE_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/core.json}"
 
-    if [[ ! -f "$state_file" ]]; then
-        report FAIL "$name" \
-            "core.json missing at $state_file (staleness — the blueprint state file moved)"
-        return
-    fi
+	if [[ ! -f "$state_file" ]]; then
+		report FAIL "$name" \
+			"core.json missing at $state_file (staleness — the blueprint state file moved)"
+		return
+	fi
 
-    # A parse/structure failure is staleness (report FAIL, never silently
-    # treated as "zero entries"); a clean parse with zero entries is a real,
-    # expected state since the thin-layer rules/CLAUDE.md move — core.sh
-    # dropped the rules surface entirely, and skills/agents are both
-    # legitimately {} once every skill and the agent ship from plugins. The
-    # two cases share no output shape: STRUCTURE_ERROR only prints on a
-    # parse/shape failure, never alongside a real (possibly zero-length)
-    # entry list, so bash never has to guess which case it's in.
-    local py_out py_rc
-    py_out="$(python3 -c '
+	# A parse/structure failure is staleness (report FAIL, never silently
+	# treated as "zero entries"); a clean parse with zero entries is a real,
+	# expected state since the thin-layer rules/CLAUDE.md move — core.sh
+	# dropped the rules surface entirely, and skills/agents are both
+	# legitimately {} once every skill and the agent ship from plugins. The
+	# two cases share no output shape: STRUCTURE_ERROR only prints on a
+	# parse/shape failure, never alongside a real (possibly zero-length)
+	# entry list, so bash never has to guess which case it's in.
+	local py_out py_rc
+	py_out="$(python3 -c '
 import json, sys
 try:
     with open(sys.argv[1]) as f:
@@ -445,40 +447,40 @@ for profile, surfaces in sorted(state.items()):
         for name, target in sorted(entries.items()):
             print(f"ENTRY\t{profile}\t{surface}\t{name}\t{target}")
 ' "$state_file")"
-    py_rc=$?
+	py_rc=$?
 
-    if [[ "$py_rc" -ne 0 ]]; then
-        report FAIL "$name" \
-            "core.json failed to parse or has an unexpected shape: ${py_out#*$'\t'} (staleness — the declared-state schema moved)"
-        return
-    fi
+	if [[ "$py_rc" -ne 0 ]]; then
+		report FAIL "$name" \
+			"core.json failed to parse or has an unexpected shape: ${py_out#*$'\t'} (staleness — the declared-state schema moved)"
+		return
+	fi
 
-    local bad=0 checked=0 issues=""
-    while IFS=$'\t' read -r tag profile surface entry_name declared_target; do
-        [[ "$tag" != "ENTRY" ]] && continue
-        local resolved_name="$entry_name"
-        [[ "$surface" == "agents" ]] && resolved_name="${entry_name}.md"
-        local expanded_target="${declared_target/#\~/$HOME}"
-        local link="$HOME/.claude-$profile/$surface/$resolved_name"
-        checked=$((checked + 1))
+	local bad=0 checked=0 issues=""
+	while IFS=$'\t' read -r tag profile surface entry_name declared_target; do
+		[[ "$tag" != "ENTRY" ]] && continue
+		local resolved_name="$entry_name"
+		[[ "$surface" == "agents" ]] && resolved_name="${entry_name}.md"
+		local expanded_target="${declared_target/#\~/$HOME}"
+		local link="$HOME/.claude-$profile/$surface/$resolved_name"
+		checked=$((checked + 1))
 
-        if [[ ! -L "$link" ]]; then
-            issues="$issues $profile/$surface/$resolved_name(not-a-symlink)"
-            bad=$((bad + 1))
-        elif [[ "$(readlink "$link")" != "$expanded_target" ]]; then
-            issues="$issues $profile/$surface/$resolved_name(wrong-target)"
-            bad=$((bad + 1))
-        elif [[ ! -e "$link" ]]; then
-            issues="$issues $profile/$surface/$resolved_name(dangling)"
-            bad=$((bad + 1))
-        fi
-    done <<<"$py_out"
+		if [[ ! -L "$link" ]]; then
+			issues="$issues $profile/$surface/$resolved_name(not-a-symlink)"
+			bad=$((bad + 1))
+		elif [[ "$(readlink "$link")" != "$expanded_target" ]]; then
+			issues="$issues $profile/$surface/$resolved_name(wrong-target)"
+			bad=$((bad + 1))
+		elif [[ ! -e "$link" ]]; then
+			issues="$issues $profile/$surface/$resolved_name(dangling)"
+			bad=$((bad + 1))
+		fi
+	done <<<"$py_out"
 
-    if [[ "$bad" -eq 0 ]]; then
-        report PASS "$name" "$checked declared symlinks verified"
-    else
-        report FAIL "$name" "$bad/$checked broken:$issues"
-    fi
+	if [[ "$bad" -eq 0 ]]; then
+		report PASS "$name" "$checked declared symlinks verified"
+	else
+		report FAIL "$name" "$bad/$checked broken:$issues"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -518,7 +520,7 @@ for profile, surfaces in sorted(state.items()):
 # heredoc-inside-command-substitution entirely.
 PY_SHADOW_CHECK_FILE="$(mktemp -t smoke-shadow-check)"
 trap 'rm -f "$PY_SHADOW_CHECK_FILE"' EXIT
-cat > "$PY_SHADOW_CHECK_FILE" <<'PYEOF'
+cat >"$PY_SHADOW_CHECK_FILE" <<'PYEOF'
 import glob
 import json
 import os
@@ -639,41 +641,41 @@ main()
 PYEOF
 
 probe_plugin_shadow_integrity() {
-    local name="plugin-shadow-integrity"
-    local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
-    local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
+	local name="plugin-shadow-integrity"
+	local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
+	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
 
-    if [[ ! -f "$plugins_state" ]]; then
-        report FAIL "$name" \
-            "plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
-        return
-    fi
+	if [[ ! -f "$plugins_state" ]]; then
+		report FAIL "$name" \
+			"plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
+		return
+	fi
 
-    local py_out py_rc
-    py_out="$(python3 "$PY_SHADOW_CHECK_FILE" "$plugins_state" "$profiles_root" 2>&1)"
-    py_rc=$?
+	local py_out py_rc
+	py_out="$(python3 "$PY_SHADOW_CHECK_FILE" "$plugins_state" "$profiles_root" 2>&1)"
+	py_rc=$?
 
-    local detail_parts=() overall_ok=1 line_status rest
-    while IFS=$'\t' read -r line_status rest; do
-        [[ -z "$line_status" ]] && continue
-        if [[ "$line_status" == "OK" || "$line_status" == "WARN" ]]; then
-            detail_parts+=("$rest")
-        else
-            overall_ok=0
-            detail_parts+=("$line_status $rest")
-        fi
-    done <<<"$py_out"
+	local detail_parts=() overall_ok=1 line_status rest
+	while IFS=$'\t' read -r line_status rest; do
+		[[ -z "$line_status" ]] && continue
+		if [[ "$line_status" == "OK" || "$line_status" == "WARN" ]]; then
+			detail_parts+=("$rest")
+		else
+			overall_ok=0
+			detail_parts+=("$line_status $rest")
+		fi
+	done <<<"$py_out"
 
-    local joined="" part
-    for part in "${detail_parts[@]}"; do
-        [[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
-    done
+	local joined="" part
+	for part in "${detail_parts[@]}"; do
+		[[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
+	done
 
-    if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
-        report PASS "$name" "$joined"
-    else
-        report FAIL "$name" "$joined"
-    fi
+	if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
+		report PASS "$name" "$joined"
+	else
+		report FAIL "$name" "$joined"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -698,7 +700,8 @@ probe_plugin_shadow_integrity() {
 # directories that carry a settings.json, rather than hardcoding
 # personal/professional as probes 3-4 do.
 # ---------------------------------------------------------------------------
-PY_PLUGIN_HOOK_CHECK="$(cat <<'PYEOF'
+PY_PLUGIN_HOOK_CHECK="$(
+	cat <<'PYEOF'
 import json, os, sys
 
 PLUGIN_KEY = "estate-hooks@core"
@@ -844,46 +847,46 @@ PYEOF
 )"
 
 probe_plugin_hook_serving() {
-    local name="plugin-hook-serving-integrity"
-    local profile_dirs=() d
+	local name="plugin-hook-serving-integrity"
+	local profile_dirs=() d
 
-    for d in "$HOME"/.claude-*; do
-        [[ -f "$d/settings.json" ]] && profile_dirs+=("$d")
-    done
+	for d in "$HOME"/.claude-*; do
+		[[ -f "$d/settings.json" ]] && profile_dirs+=("$d")
+	done
 
-    # Staleness: at least one $HOME/.claude-* profile directory with a
-    # settings.json must exist, or there is nothing live to check.
-    if [[ "${#profile_dirs[@]}" -eq 0 ]]; then
-        report FAIL "$name" \
-            "no \$HOME/.claude-* directory with a settings.json found (staleness — the probed surface moved)"
-        return
-    fi
+	# Staleness: at least one $HOME/.claude-* profile directory with a
+	# settings.json must exist, or there is nothing live to check.
+	if [[ "${#profile_dirs[@]}" -eq 0 ]]; then
+		report FAIL "$name" \
+			"no \$HOME/.claude-* directory with a settings.json found (staleness — the probed surface moved)"
+		return
+	fi
 
-    local py_out py_rc
-    py_out="$(python3 -c "$PY_PLUGIN_HOOK_CHECK" "${profile_dirs[@]}")"
-    py_rc=$?
+	local py_out py_rc
+	py_out="$(python3 -c "$PY_PLUGIN_HOOK_CHECK" "${profile_dirs[@]}")"
+	py_rc=$?
 
-    local detail_parts=() overall_ok=1 line_status label rest
-    while IFS=$'\t' read -r line_status label rest; do
-        [[ -z "$line_status" ]] && continue
-        if [[ "$line_status" == "PASS" ]]; then
-            detail_parts+=("$label: $rest")
-        else
-            overall_ok=0
-            detail_parts+=("$label: $line_status $rest")
-        fi
-    done <<<"$py_out"
+	local detail_parts=() overall_ok=1 line_status label rest
+	while IFS=$'\t' read -r line_status label rest; do
+		[[ -z "$line_status" ]] && continue
+		if [[ "$line_status" == "PASS" ]]; then
+			detail_parts+=("$label: $rest")
+		else
+			overall_ok=0
+			detail_parts+=("$label: $line_status $rest")
+		fi
+	done <<<"$py_out"
 
-    local joined="" part
-    for part in "${detail_parts[@]}"; do
-        [[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
-    done
+	local joined="" part
+	for part in "${detail_parts[@]}"; do
+		[[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
+	done
 
-    if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
-        report PASS "$name" "$joined"
-    else
-        report FAIL "$name" "$joined"
-    fi
+	if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
+		report PASS "$name" "$joined"
+	else
+		report FAIL "$name" "$joined"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -920,7 +923,8 @@ probe_plugin_hook_serving() {
 # place — probe 6 only ever checked estate-hooks; a silently-disabled
 # work-lifecycle (or a future wiki/operator) had no probe naming it.
 # ---------------------------------------------------------------------------
-PY_ENABLEMENT_CHECK="$(cat <<'PYEOF'
+PY_ENABLEMENT_CHECK="$(
+	cat <<'PYEOF'
 import json, os, sys
 
 
@@ -980,67 +984,67 @@ PYEOF
 )"
 
 probe_plugin_enablement_integrity() {
-    local name="plugin-enablement-integrity"
-    local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
-    local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
+	local name="plugin-enablement-integrity"
+	local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
+	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
 
-    if [[ ! -f "$plugins_state" ]]; then
-        report FAIL "$name" \
-            "plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
-        return
-    fi
+	if [[ ! -f "$plugins_state" ]]; then
+		report FAIL "$name" \
+			"plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
+		return
+	fi
 
-    local py_out py_rc
-    py_out="$(python3 -c "$PY_ENABLEMENT_CHECK" "$plugins_state" "$profiles_root" 2>&1)"
-    py_rc=$?
+	local py_out py_rc
+	py_out="$(python3 -c "$PY_ENABLEMENT_CHECK" "$plugins_state" "$profiles_root" 2>&1)"
+	py_rc=$?
 
-    local detail_parts=() overall_ok=1 line_status rest
-    while IFS=$'\t' read -r line_status rest; do
-        [[ -z "$line_status" ]] && continue
-        if [[ "$line_status" == "OK" ]]; then
-            detail_parts+=("$rest")
-        else
-            overall_ok=0
-            detail_parts+=("$line_status $rest")
-        fi
-    done <<<"$py_out"
+	local detail_parts=() overall_ok=1 line_status rest
+	while IFS=$'\t' read -r line_status rest; do
+		[[ -z "$line_status" ]] && continue
+		if [[ "$line_status" == "OK" ]]; then
+			detail_parts+=("$rest")
+		else
+			overall_ok=0
+			detail_parts+=("$line_status $rest")
+		fi
+	done <<<"$py_out"
 
-    # The shared-cache symlink check runs once, not per plugin — both
-    # profiles must point at the same real directory outside any checkout.
-    local personal_link="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}/.claude-personal/plugins"
-    local professional_link="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}/.claude-professional/plugins"
-    local personal_target="" professional_target="" symlink_problem=""
+	# The shared-cache symlink check runs once, not per plugin — both
+	# profiles must point at the same real directory outside any checkout.
+	local personal_link="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}/.claude-personal/plugins"
+	local professional_link="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}/.claude-professional/plugins"
+	local personal_target="" professional_target="" symlink_problem=""
 
-    if [[ -L "$personal_link" ]]; then personal_target="$(readlink "$personal_link")"; fi
-    if [[ -L "$professional_link" ]]; then professional_target="$(readlink "$professional_link")"; fi
+	if [[ -L "$personal_link" ]]; then personal_target="$(readlink "$personal_link")"; fi
+	if [[ -L "$professional_link" ]]; then professional_target="$(readlink "$professional_link")"; fi
 
-    if [[ -z "$personal_target" || -z "$professional_target" ]]; then
-        symlink_problem="one or both of $personal_link / $professional_link is not a symlink"
-    elif [[ "$personal_target" != "$professional_target" ]]; then
-        symlink_problem="plugins links diverge: $personal_target vs $professional_target"
-    elif [[ ! -d "$personal_target" ]]; then
-        symlink_problem="shared target $personal_target is not a real directory"
-    elif git -C "$personal_target" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
-        symlink_problem="shared target $personal_target is inside a git working tree"
-    fi
+	if [[ -z "$personal_target" || -z "$professional_target" ]]; then
+		symlink_problem="one or both of $personal_link / $professional_link is not a symlink"
+	elif [[ "$personal_target" != "$professional_target" ]]; then
+		symlink_problem="plugins links diverge: $personal_target vs $professional_target"
+	elif [[ ! -d "$personal_target" ]]; then
+		symlink_problem="shared target $personal_target is not a real directory"
+	elif git -C "$personal_target" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+		symlink_problem="shared target $personal_target is inside a git working tree"
+	fi
 
-    if [[ -n "$symlink_problem" ]]; then
-        overall_ok=0
-        detail_parts+=("shared plugins dir: $symlink_problem")
-    else
-        detail_parts+=("shared plugins dir: $personal_target (real, outside any git working tree, both profiles agree)")
-    fi
+	if [[ -n "$symlink_problem" ]]; then
+		overall_ok=0
+		detail_parts+=("shared plugins dir: $symlink_problem")
+	else
+		detail_parts+=("shared plugins dir: $personal_target (real, outside any git working tree, both profiles agree)")
+	fi
 
-    local joined="" part
-    for part in "${detail_parts[@]}"; do
-        [[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
-    done
+	local joined="" part
+	for part in "${detail_parts[@]}"; do
+		[[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
+	done
 
-    if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
-        report PASS "$name" "$joined"
-    else
-        report FAIL "$name" "$joined"
-    fi
+	if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
+		report PASS "$name" "$joined"
+	else
+		report FAIL "$name" "$joined"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1061,7 +1065,8 @@ probe_plugin_enablement_integrity() {
 # verb already reports this per-slice; this probe is the same check folded
 # into the one place a session actually runs before trusting its own inputs).
 # ---------------------------------------------------------------------------
-PY_RULES_CLAUDE_MD_CHECK="$(cat <<'PYEOF'
+PY_RULES_CLAUDE_MD_CHECK="$(
+	cat <<'PYEOF'
 import hashlib
 import json
 import os
@@ -1147,43 +1152,43 @@ PYEOF
 )"
 
 probe_rules_claude_md_integrity() {
-    local name="rules-claude-md-integrity"
-    local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
-    local dotty_repo="${SMOKE_DOTTY_REPO_OVERRIDE:-$HOME/bin/dotty}"
-    local blueprint_dir="${SMOKE_BLUEPRINT_DIR_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint}"
+	local name="rules-claude-md-integrity"
+	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
+	local dotty_repo="${SMOKE_DOTTY_REPO_OVERRIDE:-$HOME/bin/dotty}"
+	local blueprint_dir="${SMOKE_BLUEPRINT_DIR_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint}"
 
-    if [[ ! -f "$blueprint_dir/ways-of-working.json" ]]; then
-        report FAIL "$name" \
-            "ways-of-working.json missing at $blueprint_dir (staleness — the blueprint slice moved)"
-        return
-    fi
+	if [[ ! -f "$blueprint_dir/ways-of-working.json" ]]; then
+		report FAIL "$name" \
+			"ways-of-working.json missing at $blueprint_dir (staleness — the blueprint slice moved)"
+		return
+	fi
 
-    local py_out
-    py_out="$(python3 -c "$PY_RULES_CLAUDE_MD_CHECK" "$profiles_root" "$dotty_repo" "$blueprint_dir" 2>&1)"
-    local py_rc=$?
+	local py_out
+	py_out="$(python3 -c "$PY_RULES_CLAUDE_MD_CHECK" "$profiles_root" "$dotty_repo" "$blueprint_dir" 2>&1)"
+	local py_rc=$?
 
-    local detail_parts=() overall_ok=1 line_status rest
-    while IFS=$'\t' read -r line_status rest; do
-        [[ -z "$line_status" ]] && continue
-        if [[ "$line_status" == "OK" ]]; then
-            detail_parts+=("$rest")
-        else
-            overall_ok=0
-            detail_parts+=("$line_status $rest")
-        fi
-    done <<<"$py_out"
+	local detail_parts=() overall_ok=1 line_status rest
+	while IFS=$'\t' read -r line_status rest; do
+		[[ -z "$line_status" ]] && continue
+		if [[ "$line_status" == "OK" ]]; then
+			detail_parts+=("$rest")
+		else
+			overall_ok=0
+			detail_parts+=("$line_status $rest")
+		fi
+	done <<<"$py_out"
 
-    local joined="" part
-    for part in "${detail_parts[@]}"; do
-        [[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
-    done
-    [[ -z "$joined" ]] && joined="4 files checked in each of 2 profiles, all matched declared source"
+	local joined="" part
+	for part in "${detail_parts[@]}"; do
+		[[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
+	done
+	[[ -z "$joined" ]] && joined="4 files checked in each of 2 profiles, all matched declared source"
 
-    if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
-        report PASS "$name" "$joined"
-    else
-        report FAIL "$name" "$joined"
-    fi
+	if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
+		report PASS "$name" "$joined"
+	else
+		report FAIL "$name" "$joined"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1247,7 +1252,8 @@ probe_rules_claude_md_integrity() {
 # more reliably: prove the puller is armed, don't reimplement the puller's
 # own network check with a strictly worse, offline substitute).
 # ---------------------------------------------------------------------------
-PY_MARKETPLACE_CURRENCY_CHECK="$(cat <<'PYEOF'
+PY_MARKETPLACE_CURRENCY_CHECK="$(
+	cat <<'PYEOF'
 import hashlib
 import json
 import os
@@ -1380,41 +1386,41 @@ PYEOF
 )"
 
 probe_plugin_marketplace_currency() {
-    local name="plugin-marketplace-currency"
-    local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
-    local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
+	local name="plugin-marketplace-currency"
+	local plugins_state="${SMOKE_PLUGINS_JSON_OVERRIDE:-$HOME/bin/dotty-private/.claude/blueprint/plugins.json}"
+	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
 
-    if [[ ! -f "$plugins_state" ]]; then
-        report FAIL "$name" \
-            "plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
-        return
-    fi
+	if [[ ! -f "$plugins_state" ]]; then
+		report FAIL "$name" \
+			"plugins.json missing at $plugins_state (staleness — the blueprint state file moved)"
+		return
+	fi
 
-    local py_out py_rc
-    py_out="$(python3 -c "$PY_MARKETPLACE_CURRENCY_CHECK" "$profiles_root" "$plugins_state" 2>&1)"
-    py_rc=$?
+	local py_out py_rc
+	py_out="$(python3 -c "$PY_MARKETPLACE_CURRENCY_CHECK" "$profiles_root" "$plugins_state" 2>&1)"
+	py_rc=$?
 
-    local detail_parts=() overall_ok=1 line_status rest
-    while IFS=$'\t' read -r line_status rest; do
-        [[ -z "$line_status" ]] && continue
-        if [[ "$line_status" == "OK" ]]; then
-            detail_parts+=("$rest")
-        else
-            overall_ok=0
-            detail_parts+=("$line_status $rest")
-        fi
-    done <<<"$py_out"
+	local detail_parts=() overall_ok=1 line_status rest
+	while IFS=$'\t' read -r line_status rest; do
+		[[ -z "$line_status" ]] && continue
+		if [[ "$line_status" == "OK" ]]; then
+			detail_parts+=("$rest")
+		else
+			overall_ok=0
+			detail_parts+=("$line_status $rest")
+		fi
+	done <<<"$py_out"
 
-    local joined="" part
-    for part in "${detail_parts[@]}"; do
-        [[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
-    done
+	local joined="" part
+	for part in "${detail_parts[@]}"; do
+		[[ -z "$joined" ]] && joined="$part" || joined="$joined; $part"
+	done
 
-    if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
-        report PASS "$name" "$joined"
-    else
-        report FAIL "$name" "$joined"
-    fi
+	if [[ "$py_rc" -eq 0 && "$overall_ok" -eq 1 ]]; then
+		report PASS "$name" "$joined"
+	else
+		report FAIL "$name" "$joined"
+	fi
 }
 
 # ---------------------------------------------------------------------------
@@ -1431,15 +1437,15 @@ probe_rules_claude_md_integrity
 probe_plugin_marketplace_currency
 
 for line in "${RESULT_LINES[@]}"; do
-    printf '%s\n' "$line"
+	printf '%s\n' "$line"
 done
 
 TOTAL="${#RESULT_LINES[@]}"
 PASS_COUNT=$((TOTAL - FAIL_COUNT))
 if [[ "$FAIL_COUNT" -eq 0 ]]; then
-    printf 'SUMMARY: %d/%d probes passed\n' "$PASS_COUNT" "$TOTAL"
+	printf 'SUMMARY: %d/%d probes passed\n' "$PASS_COUNT" "$TOTAL"
 else
-    printf 'SUMMARY: %d/%d probes passed, %d failed\n' "$PASS_COUNT" "$TOTAL" "$FAIL_COUNT"
+	printf 'SUMMARY: %d/%d probes passed, %d failed\n' "$PASS_COUNT" "$TOTAL" "$FAIL_COUNT"
 fi
 
 [[ "$FAIL_COUNT" -eq 0 ]]
