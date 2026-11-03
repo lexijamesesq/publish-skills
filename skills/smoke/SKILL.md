@@ -58,7 +58,7 @@ Do not add a probe without a new failure (or a map-ruled exception, declared her
 **Constraints.**
 
 - **Hard:** no writes, no network, no credential access. `smoke.sh` never fixes a finding.
-- **Steering:** cadence is deliberately NOT scheduled. The Mac carries no wall-clock automation by estate ruling (unlike the Pi's cron-driven lanes), so invocation is an operator-initiated convention: run at session-start for any infrastructure-touching session, and after any infrastructure change (a hook edit, a `settings.json` edit, a `lint.py` change). Nothing enforces this — the discipline is the caller's.
+- **Steering:** cadence is deliberately NOT scheduled. The Mac carries no wall-clock automation by estate ruling (unlike the Pi's cron-driven lanes), so invocation is an operator-initiated convention: run at session-start for any infrastructure-touching session, and after any infrastructure change (a hook edit, a `settings.json` edit, a change to the contract lint tool, `contract_lint.py`). Nothing enforces this — the discipline is the caller's.
 
 **Decision authority.**
 
