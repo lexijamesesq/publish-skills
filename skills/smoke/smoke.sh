@@ -49,14 +49,16 @@ report() {
 # ---------------------------------------------------------------------------
 # Probe 2: lint-suite
 #
-# Proves lint.py's fixture suite still passes. Regression class: a false-
-# green fixture class plus a python-version drift that changed check
-# behavior between machines — both caught only by re-running the suite, not
-# by reading the script.
+# Proves the knowledge-file contract lint's fixture suite still passes
+# (contract_lint.py and describe.py in the wiki repo's knowledge-description
+# skill; it replaced lint.py, whose suite this probe ran before).
+# Regression class: a false-green fixture class plus a python-version
+# drift that changed check behavior between machines — both caught only by
+# re-running the suite, not by reading the script.
 # ---------------------------------------------------------------------------
 probe_lint_suite() {
 	local name="lint-suite"
-	local tests_dir="$HOME/Repos/wiki/.claude/skills/lint-knowledge/tests"
+	local tests_dir="$HOME/Repos/wiki/.claude/skills/knowledge-description/tests"
 	local runner="$tests_dir/run_tests.py"
 
 	# Staleness: the suite this probe runs must still exist at its known path.

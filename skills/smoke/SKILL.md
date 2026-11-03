@@ -26,7 +26,7 @@ This skill owns ONE thing: proving eight specific local surfaces are wired corre
 
 | Probe | Proves | Incident that added it |
 | --- | --- | --- |
-| `lint-suite` | `lint.py`'s fixture suite still passes | a false-green fixture class plus a python-version drift that changed check behavior between machines — both surfaced only by re-running the suite, never by reading the script |
+| `lint-suite` | the knowledge-file contract lint's fixture suite (`contract_lint.py`, `describe.py`) still passes | a false-green fixture class plus a python-version drift that changed check behavior between machines — both surfaced only by re-running the suite, never by reading the script |
 | `hook-registration-integrity` | every `.sh` hook a declared profile's `settings.json` registers still exists and is executable, with `hooks` the literal `{}` shape and no registration pointing under a deleted checkout path | a stale registered hook — an entry pointing at a path that had moved or lost its executable bit, invisible until the hook silently failed to fire |
 | `core-symlink-integrity` | every per-entry symlink the core blueprint slice declares exists, is a symlink, and resolves to its declared target | 2026-07-18 — a dangling agents symlink persisted two months after its target was deleted, and `~/.git` pointed at a tree whose content sat one level down, producing 56 phantom deletions visible to any session under `$HOME` |
 | `plugin-shadow-integrity` | no profile's own `skills/`/`agents/` directory has a live entry sharing a name with something an enabled, declared plugin already serves | 2026-09-03 — the prior form of this probe (`blueprint-coverage`) was self-referential (compared whichever skills tree it happened to run beside against `core.json`) and produced 36 false "undeclared" positives once probed from a location other than the source checkout; reworked to the correct post-cutover invariant, a live shadow silently winning over the plugin it shadows |
@@ -58,7 +58,7 @@ Do not add a probe without a new failure (or a map-ruled exception, declared her
 **Constraints.**
 
 - **Hard:** no writes, no network, no credential access. `smoke.sh` never fixes a finding.
-- **Steering:** cadence is deliberately NOT scheduled. The Mac carries no wall-clock automation by estate ruling (unlike the Pi's cron-driven lanes), so invocation is an operator-initiated convention: run at session-start for any infrastructure-touching session, and after any infrastructure change (a hook edit, a `settings.json` edit, a `lint.py` change). Nothing enforces this — the discipline is the caller's.
+- **Steering:** cadence is deliberately NOT scheduled. The Mac carries no wall-clock automation by estate ruling (unlike the Pi's cron-driven lanes), so invocation is an operator-initiated convention: run at session-start for any infrastructure-touching session, and after any infrastructure change (a hook edit, a `settings.json` edit, a change to the contract lint tool, `contract_lint.py`). Nothing enforces this — the discipline is the caller's.
 
 **Decision authority.**
 
@@ -67,7 +67,7 @@ Do not add a probe without a new failure (or a map-ruled exception, declared her
 
 **Stop rules.**
 
-- `/smoke` only reports. It never edits a hook, a `settings.json`, or `lint.py` — the exit contract (0 iff zero FAILs) is the entire interface a caller needs.
+- `/smoke` only reports. It never edits a hook, a `settings.json`, or the lint tool — the exit contract (0 iff zero FAILs) is the entire interface a caller needs.
 - A probe's staleness check fails → that probe reports FAIL naming what moved. Never silently skip a probe whose target can't be found.
 
 ## Navigation
@@ -86,7 +86,7 @@ Do not add a probe without a new failure (or a map-ruled exception, declared her
 ## References
 
 - `smoke.sh` — the entire probe implementation; read it before trusting a change to this skill.
-- `~/Repos/wiki/.claude/skills/lint-knowledge/tests/run_tests.py` — probe 2's target (the lint suite ships in the companion wiki repo, outside the vault).
+- `~/Repos/wiki/.claude/skills/knowledge-description/tests/run_tests.py` — probe 2's target (the contract lint's suite ships in the companion wiki repo, outside the vault).
 - `~/.claude-personal/settings.json`, `~/.claude-professional/settings.json` — probe 3's targets.
 - `~/bin/dotty-private/.claude/blueprint/core.json` — probe 4's declared state.
 - `~/bin/dotty-private/.claude/blueprint/plugins.json` — probes 5 and 7's declared-plugin-per-profile state; probe 5 also walks each declared plugin's installed cache (its `.claude-plugin/plugin.json` `skills` field when present, else `skills/*`, plus `agents/*.md`) and each profile's own `skills/`/`agents/` dirs.
