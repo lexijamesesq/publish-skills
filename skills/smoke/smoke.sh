@@ -4,8 +4,8 @@
 # On-demand Mac-side configuration health check: proves each protection layer
 # (hooks, lint gate, registered automation) is wired RIGHT NOW, not that it
 # was wired the day it shipped. Read-only, no network, no credentials, no
-# writes — every probe exercises the real surface (pipes JSON at the real
-# hook, runs the real test suite, parses the real live settings.json) and
+# writes — every probe exercises the real surface (runs the real test suite,
+# parses the real live settings.json, inspects the real registered state) and
 # reports; it never fixes anything.
 #
 # Output: one line per probe, "PASS|FAIL <probe-name>: <detail>", then a
