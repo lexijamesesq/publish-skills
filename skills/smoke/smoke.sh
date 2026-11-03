@@ -42,131 +42,9 @@ report() {
 	[[ "$status" == "FAIL" ]] && FAIL_COUNT=$((FAIL_COUNT + 1))
 }
 
-# resolve_estate_hooks_install <profile_dir> — echoes the installPath of
-# estate-hooks@core's scope:user install entry from that profile's
-# installed_plugins.json, or nothing if unresolved. Shared by probe 1 (which
-# needs one real cache to pipe JSON at) and probe 6 (defined further down,
-# which keeps its own inline resolution — this helper exists for probe 1
-# only, to avoid a second divergent implementation).
-PY_RESOLVE_ESTATE_HOOKS_CACHE="$(
-	cat <<'PYEOF'
-import json, os, sys
-path = sys.argv[1]
-try:
-    with open(path, "r", encoding="utf-8") as f:
-        data = json.load(f)
-except Exception:
-    sys.exit(0)
-entries = data.get("plugins", {}).get("estate-hooks@core", [])
-for e in entries:
-    if isinstance(e, dict) and e.get("scope") == "user":
-        p = e.get("installPath", "")
-        if p and os.path.isdir(p):
-            print(p)
-            break
-PYEOF
-)"
-
-# ---------------------------------------------------------------------------
-# Probe 1: hook-tilde-expansion
-#
-# Proves vault-mcp-redirect.sh still expands a tilde-form VAULT_ROOT before
-# comparing it against a realpath-resolved target. Regression class: the
-# 2026-06-02 incident where both vault hooks compared a realpath-resolved
-# absolute path against an UNEXPANDED tilde, so the `case` match never fired
-# and generic tools silently passed through on every vault .md file.
-#
-# Reworked: the hook used to be resolved by a path relative to
-# this script's own location (valid when smoke.sh and the hooks shipped
-# from the same dotty checkout). Post-cutover, hooks ship from the separate
-# estate-hooks@core plugin — this probe was silently broken
-# (confirmed live pre-rework: FAIL, hook missing at a path inside
-# core-skills' own tree that was never where hooks lived). Resolves the
-# hook from the installed estate-hooks cache instead, scoped to a profile
-# where settings "hooks" is the literal {} shape (plugin-served).
-# ---------------------------------------------------------------------------
-probe_hook_tilde_expansion() {
-	local name="hook-tilde-expansion"
-	local profiles_root="${SMOKE_PROFILES_ROOT_OVERRIDE:-$HOME}"
-	local profile_dirs=() d
-
-	for d in "$profiles_root"/.claude-*; do
-		[[ -f "$d/settings.json" ]] || continue
-		local shape
-		shape="$(python3 -c '
-import json, sys
-try:
-    with open(sys.argv[1], "r", encoding="utf-8") as f:
-        s = json.load(f)
-except Exception:
-    print("ERROR"); sys.exit()
-print("EMPTY" if s.get("hooks", object()) == {} else "OTHER")
-' "$d/settings.json" 2>/dev/null)"
-		[[ "$shape" == "EMPTY" ]] && profile_dirs+=("$d")
-	done
-
-	# Staleness: no plugin-served profile means nothing live to resolve the
-	# hook from — this is itself the failure this probe exists to catch
-	# post-cutover, not a condition to skip past.
-	if [[ "${#profile_dirs[@]}" -eq 0 ]]; then
-		report FAIL "$name" \
-			"no \$HOME/.claude-* profile has settings.json \"hooks\":{} (staleness — no plugin-served profile to resolve the hook from)"
-		return
-	fi
-
-	local profile_dir="${profile_dirs[0]}"
-	local installed_path="$profile_dir/plugins/installed_plugins.json"
-	if [[ ! -f "$installed_path" ]]; then
-		report FAIL "$name" \
-			"installed_plugins.json missing at $installed_path (staleness)"
-		return
-	fi
-
-	local install_path
-	install_path="$(python3 -c "$PY_RESOLVE_ESTATE_HOOKS_CACHE" "$installed_path" 2>/dev/null)"
-
-	if [[ -z "$install_path" ]]; then
-		report FAIL "$name" \
-			"estate-hooks@core installPath unresolved from $installed_path (staleness — the probed surface moved)"
-		return
-	fi
-
-	local hook="$install_path/hooks/vault-mcp-redirect.sh"
-
-	if [[ ! -x "$hook" ]]; then
-		report FAIL "$name" \
-			"vault-mcp-redirect.sh missing or not executable at $hook (staleness — the probed surface moved)"
-		return
-	fi
-
-	# The probed path need not exist — the hook's realpath fallback returns
-	# the raw target unchanged when realpath can't resolve it.
-	local payload rc_block rc_open
-	payload='{"tool_name":"Read","tool_input":{"file_path":"'"$HOME"'/__smoke_fixture__/x.md"}}'
-
-	# Health, block case: tilde-form VAULT_ROOT, single-quoted so THIS shell
-	# never expands it — the hook must expand it internally (via its own
-	# ${VAULT/#\~/$HOME}) and block (exit 2). If the hook's tilde-expansion
-	# regresses, this exit code silently reverts to 0.
-	# shellcheck disable=SC2088  # intentional — this probe exists to prove
-	# the HOOK expands the tilde; expanding it here would defeat the test.
-	printf '%s' "$payload" | VAULT_ROOT='~/__smoke_fixture__' "$hook" >/dev/null 2>&1
-	rc_block=$?
-
-	# Inverse control: VAULT_ROOT unset entirely must fail-open (exit 0).
-	# Without this control, a hook that always exits 2 (e.g. broken jq
-	# detection) would look like a PASS above for the wrong reason.
-	printf '%s' "$payload" | env -u VAULT_ROOT "$hook" >/dev/null 2>&1
-	rc_open=$?
-
-	if [[ "$rc_block" -eq 2 && "$rc_open" -eq 0 ]]; then
-		report PASS "$name" \
-			"resolved via $(basename "$profile_dir")'s estate-hooks cache ($install_path); tilde VAULT_ROOT blocked (exit 2); unset VAULT_ROOT fell open (exit 0)"
-	else
-		report FAIL "$name" \
-			"expected block=2/open=0, got block=$rc_block/open=$rc_open — tilde-expansion regression (2026-06-02 class)"
-	fi
-}
+# Probe 1 (hook-tilde-expansion) is retired: the hook it proved, the vault MCP
+# redirect, no longer exists. Probe numbers 2-9 are stable so SKILL.md and past
+# reports keep their references; there is no probe 1.
 
 # ---------------------------------------------------------------------------
 # Probe 2: lint-suite
@@ -1426,7 +1304,6 @@ probe_plugin_marketplace_currency() {
 # ---------------------------------------------------------------------------
 # Run all probes, print results, summarize, exit.
 # ---------------------------------------------------------------------------
-probe_hook_tilde_expansion
 probe_lint_suite
 probe_hook_registration_integrity
 probe_core_symlink_integrity
