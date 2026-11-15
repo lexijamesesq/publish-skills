@@ -20,11 +20,12 @@ example. It is a reference card, not a novel — every entity is one-line-define
 ## When To Use
 
 Load this skill whenever authoring or sanitizing:
+
 - A worked example, few-shot example, or `<thinking>` trace in a public dotty/Wiki skill file
 - A new `*.sample.*` file
-- Real vault/company content being genericized for a public repo
+- Real personal or company content being genericized for a public repo
 
-Do NOT load it for private, non-published vault content — the universe protects publication boundaries;
+Do NOT load it for private, non-published content — the universe protects publication boundaries;
 it doesn't replace real content everywhere.
 
 ## The Rules
@@ -33,8 +34,8 @@ it doesn't replace real content everywhere.
    Never invent a name ad hoc, even a "flat" placeholder-sounding one — if `universe.md` doesn't have it,
    extend it (below), don't freelance.
 2. **Operator config values are out of scope here.** Real installation-specific values (product names, org
-   terms, credentials, issue keys) live in gitignored CLAUDE.md/config and are referenced by config-key or
-   `{workspace_root}` placeholder — per `Projects/Incubator/CLAUDE.md` § Decisions Made. This skill only
+   terms, credentials, issue keys) live in gitignored CLAUDE.md/config and are referenced by config key — per the
+   Incubator project's Decisions in its Notion documentation. This skill only
    supplies the FICTION standing in for narrative/teaching examples; it never touches real config values.
 3. **One citation per file.** A file using the universe cites it once (see `org-taxonomy.sample.md`'s
    Worked Example for the precedent phrasing) — not a disclaimer on every example.
@@ -55,7 +56,7 @@ in the file that needed it.
 
 - Does NOT decide whether content needs sanitizing — that's the publishing workflow
   (pre-commit + the PR's required checks) / sample-file convention's call.
-- Does NOT replace `{workspace_root}` / config-key abstraction for real operator values — narrative
+- Does NOT replace config-key abstraction for real operator values — narrative
   fiction and config abstraction are different problems, solved by different mechanisms.
 - Does NOT own knowledge-contract Part I's real-roster split (`tag-taxonomy-rosters.md` stays the real-roster boundary;
   this universe's people are fiction, not roster entries).
@@ -65,7 +66,7 @@ in the file that needed it.
 - `universe.md` (bundled) — the canonical reference card.
 - `~/Repos/Incubator/.claude/skills/cross-domain/org-taxonomy.sample.md` — the themed-sample + citation
   precedent this skill generalizes.
-- `Projects/Incubator/CLAUDE.md` § Decisions Made — the config-key abstraction rule this skill complements
+- The Incubator project's Decisions (its Notion documentation) — the config-key abstraction rule this skill complements
   (fiction vs. config are separate concerns).
 - `~/Repos/Incubator/Ideas/sample-foraging-intelligence.md` — the canonical exemplar this universe's tone
   is calibrated against.
